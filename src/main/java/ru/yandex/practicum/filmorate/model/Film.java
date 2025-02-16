@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 
 import java.time.LocalDate;
@@ -12,13 +13,14 @@ import java.time.LocalDate;
  * Film.
  */
 @Data
+@FieldDefaults
 public class Film {
     @NotNull
-    private String name;
-    private Long id;
+    String name;
+    Long id;
     @Size(max = 200)
-    private String description;
-    private LocalDate releaseDate;
+    String description;
+    LocalDate releaseDate;
     @Min(1)
-    private long duration;
+    long duration;
 }
