@@ -36,7 +36,7 @@ class FilmorateApplicationTests {
         for (ConstraintViolation<Film> violation : violations) {
             info = violation.getMessage();
         }
-        assertEquals(info, "не должно равняться null");
+        assertEquals(info, "must not be null");
     }
 
     @Test
@@ -48,7 +48,7 @@ class FilmorateApplicationTests {
         for (ConstraintViolation<Film> violation : violations) {
             info = violation.getMessage();
         }
-        assertEquals(info, "должно быть не меньше 1");
+        assertEquals(info, "must be greater than or equal to 1");
     }
 
     @Test
@@ -61,7 +61,7 @@ class FilmorateApplicationTests {
         for (ConstraintViolation<User> violation : violations) {
             info = violation.getMessage();
         }
-        assertEquals(info, "должно иметь формат адреса электронной почты");
+        assertEquals(info, "must be a well-formed email address");
     }
 
 
