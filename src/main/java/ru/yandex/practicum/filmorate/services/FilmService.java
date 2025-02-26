@@ -27,9 +27,9 @@ public class FilmService {
 
     private Optional<User> findUserForId(long idUser) {
         List<User> users = userStorage.getAllUsers();
-        return users.stream().
-                filter(user -> user.getId() == idUser).
-                findFirst();
+        return users.stream()
+                .filter(user -> user.getId() == idUser)
+                .findFirst();
     }
 
     public void addLikeForFilm(long idFilm, long idUser) {
@@ -42,9 +42,9 @@ public class FilmService {
                 throw new RuntimeException("Пользователь с id " + idUser + " ставил лайк");
             }
         }
-        Optional<Film> findFilm = filmStorage.getAllFilms().stream().
-                filter(film -> film.getId() == idFilm).
-                findFirst();
+        Optional<Film> findFilm = filmStorage.getAllFilms().stream()
+                .filter(film -> film.getId() == idFilm)
+                .findFirst();
         if (findFilm.isPresent()) {
             findFilm.get().setLikes(findFilm.get().getLikes() + 1);
         } else throw new ObjectNotFound("Фильм не найден");
@@ -58,9 +58,9 @@ public class FilmService {
         if (findUser.isEmpty()) {
             throw new ObjectNotFound("Пользователь не найден");
         }
-        Optional<Film> findFilm = filmStorage.getAllFilms().stream().
-                filter(film -> film.getId() == id).
-                findFirst();
+        Optional<Film> findFilm = filmStorage.getAllFilms().stream()
+                .filter(film -> film.getId() == id)
+                .findFirst();
         if (findFilm.isPresent()) {
             findFilm.get().setLikes(findFilm.get().getLikes() - 1);
         } else throw new ObjectNotFound("Фильм не найден");
@@ -73,9 +73,9 @@ public class FilmService {
                 return o2.getLikes() - o1.getLikes();
             }
         };
-        List<Film> sortFilms = filmStorage.getAllFilms().stream().
-                sorted(comparatorForSort).
-                collect(Collectors.toList());
+        List<Film> sortFilms = filmStorage.getAllFilms().stream()
+                .sorted(comparatorForSort)
+                .collect(Collectors.toList());
         if (count > filmStorage.getAllFilms().size()) {
             return sortFilms.subList(0, filmStorage.getAllFilms().size());
         } else return sortFilms.subList(0, count);
