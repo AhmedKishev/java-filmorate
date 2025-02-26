@@ -16,6 +16,7 @@ import java.time.LocalDate;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
+    int likes;
     @NotNull
     String name;
     Long id;
