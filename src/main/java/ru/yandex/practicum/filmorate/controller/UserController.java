@@ -31,21 +31,21 @@ public class UserController {
     }
 
 
-    @PutMapping("/{id}/friends/{friendId}")
+    @PutMapping("/{id}/friends/{friend-Id}")
     public List<User> addFriend(@PathVariable("id") int id,
-                                @PathVariable("friendId") int friendId) {
+                                @PathVariable("friend-Id") int friendId) {
         return userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
+    @DeleteMapping("/{id}/friends/{friend-Id}")
     public void deleteFriend(@PathVariable("id") int id,
-                             @PathVariable("friendId") int friendId) {
+                             @PathVariable("friend-Id") int friendId) {
         userService.deleteFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}")
+    @GetMapping("/{id}/friends/common/{other-Id}")
     public List<User> listFriendWithOtherUser(@PathVariable("id") int id,
-                                              @PathVariable("otherId") int otherId) {
+                                              @PathVariable("other-Id") int otherId) {
         return userService.getListFriendsWithOtherUser(id, otherId);
     }
 

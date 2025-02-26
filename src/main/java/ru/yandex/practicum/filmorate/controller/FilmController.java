@@ -27,9 +27,9 @@ public class FilmController {
         return inMemoryFilmStorage.getAllFilms();
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/{id}/like/{user-Id}")
     public void addLike(@PathVariable("id") int id,
-                        @PathVariable("userId") int userId) {
+                        @PathVariable("user-Id") int userId) {
         filmService.addLikeForFilm(id, userId);
     }
 
@@ -39,9 +39,9 @@ public class FilmController {
         return film;
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{user-Id}")
     public void deleteLike(@PathVariable("id") int id,
-                           @PathVariable("userId") int userId) {
+                           @PathVariable("user-Id") int userId) {
         filmService.deleteLikeFilm(id, userId);
     }
 
