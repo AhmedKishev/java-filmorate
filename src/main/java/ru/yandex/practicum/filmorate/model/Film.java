@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.yandex.practicum.filmorate.enums.Genre;
+import ru.yandex.practicum.filmorate.enums.MPA;
 
 
 import java.time.LocalDate;
@@ -16,6 +18,8 @@ import java.time.LocalDate;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
+    Genre genre;
+    MPA mpa;
     int likes;
     @NotNull
     String name;
