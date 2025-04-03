@@ -58,4 +58,5 @@ class UserDbTest {
                 .isPresent()
                 .hasValueSatisfying(user -> assertThat(user).hasFieldOrPropertyWithValue("email", "AE"));
     }
+
 } 

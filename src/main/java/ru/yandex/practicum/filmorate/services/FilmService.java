@@ -132,4 +132,5 @@ public class FilmService {
     public Genre findGenreById(int id) {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
     }
+
 }

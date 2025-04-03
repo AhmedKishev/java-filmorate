@@ -163,4 +163,5 @@ public class UserService {
                 .filter(user -> intersection.contains(user.getId()))
                 .collect(Collectors.toList());
     }
+
 }

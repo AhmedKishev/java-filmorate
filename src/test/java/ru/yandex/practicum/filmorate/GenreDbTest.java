@@ -31,4 +31,5 @@ public class GenreDbTest {
                         AssertionsForClassTypes.assertThat(mpa).hasFieldOrPropertyWithValue("name", "Мультфильм")
                 );
     }
+
 }

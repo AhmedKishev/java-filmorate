@@ -33,4 +33,5 @@ public class MPADbTest {
                         assertThat(mpa).hasFieldOrPropertyWithValue("name", "PG")
                 );
     }
+
 }

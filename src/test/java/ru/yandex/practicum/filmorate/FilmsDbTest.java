@@ -68,4 +68,5 @@ public class FilmsDbTest {
                 .isPresent()
                 .hasValueSatisfying(film -> assertThat(film).hasFieldOrPropertyWithValue("name", "Interstellar"));
     }
+
 }
