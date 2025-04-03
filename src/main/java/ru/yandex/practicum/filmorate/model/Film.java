@@ -4,26 +4,27 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import ru.yandex.practicum.filmorate.enums.Genre;
-import ru.yandex.practicum.filmorate.enums.MPA;
 
 
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Film.
  */
 @Data
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
-    Genre genre;
+    Set<Genre> genres;
     MPA mpa;
     int likes;
     @NotNull
     String name;
-    Long id;
+    Integer id;
     @Size(max = 200)
     String description;
     LocalDate releaseDate;
