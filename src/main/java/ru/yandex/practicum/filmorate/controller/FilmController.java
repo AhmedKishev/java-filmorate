@@ -17,7 +17,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmController {
     final FilmService filmService;
-    final String PATH_ID_FILM_TO_USER_ID = "/{id}/like/{user-id}";
+    static final String PATH_ID_FILM_TO_USER_ID ="/{id}/like/{user-id}";
 
     @GetMapping
     public Collection<Film> getAllFilms() {

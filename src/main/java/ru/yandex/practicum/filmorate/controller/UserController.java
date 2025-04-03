@@ -17,7 +17,7 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
     final UserService userService;
-    final String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
+    static final String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
 
     @Autowired
     public UserController(UserService userService) {
