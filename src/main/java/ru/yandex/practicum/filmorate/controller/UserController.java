@@ -54,9 +54,9 @@ public class UserController {
         userService.deleteFriend(id, friendId);
     }
 
-    @GetMapping(PATH_USER_ID_TO_FRIEND_ID)
+    @GetMapping("/{id}/friends/common/{other-id}")
     public List<User> listFriendWithOtherUser(@PathVariable("id") int id,
-                                              @PathVariable("friend-id") int otherId) {
+                                              @PathVariable("other-id") int otherId) {
         return userService.getListFriendsWithOtherUser(id, otherId);
     }
 
