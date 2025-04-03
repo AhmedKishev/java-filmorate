@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +14,10 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
-    private final UserService userService;
+    final UserService userService;
+    final static String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
 
     @Autowired
     public UserController(UserService userService) {
@@ -38,21 +42,21 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    @PutMapping("/{id}/friends/{friend-Id}")
+    @PutMapping(PATH_USER_ID_TO_FRIEND_ID)
     public List<User> addFriend(@PathVariable("id") int id,
-                                @PathVariable("friend-Id") int friendId) {
+                                @PathVariable("friend-id") int friendId) {
         return userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friend-Id}")
+    @DeleteMapping(PATH_USER_ID_TO_FRIEND_ID)
     public void deleteFriend(@PathVariable("id") int id,
-                             @PathVariable("friend-Id") int friendId) {
+                             @PathVariable("friend-id") int friendId) {
         userService.deleteFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends/common/{other-Id}")
+    @GetMapping(PATH_USER_ID_TO_FRIEND_ID)
     public List<User> listFriendWithOtherUser(@PathVariable("id") int id,
-                                              @PathVariable("other-Id") int otherId) {
+                                              @PathVariable("friend-id") int otherId) {
         return userService.getListFriendsWithOtherUser(id, otherId);
     }
 

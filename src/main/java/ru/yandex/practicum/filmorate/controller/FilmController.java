@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
@@ -12,9 +14,10 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/films")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmController {
-    private final FilmService filmService;
-
+    final FilmService filmService;
+    final static String PATH_ID_FILM_TO_USER_ID = "/{id}/like/{user-id}";
 
     @GetMapping
     public Collection<Film> getAllFilms() {
@@ -22,9 +25,9 @@ public class FilmController {
     }
 
 
-    @PutMapping("/{id}/like/{user-Id}")
+    @PutMapping(PATH_ID_FILM_TO_USER_ID)
     public void addLike(@PathVariable("id") int id,
-                        @PathVariable("user-Id") int userId) {
+                        @PathVariable("user-id") int userId) {
         filmService.addLike(id, userId);
     }
 
@@ -34,9 +37,9 @@ public class FilmController {
         return film;
     }
 
-    @DeleteMapping("/{id}/like/{user-Id}")
+    @DeleteMapping(PATH_ID_FILM_TO_USER_ID)
     public void deleteLike(@PathVariable("id") int id,
-                           @PathVariable("user-Id") int userId) {
+                           @PathVariable("user-id") int userId) {
         filmService.removeLike(id, userId);
     }
 

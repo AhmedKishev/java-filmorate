@@ -55,8 +55,6 @@ public class UserService {
             throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
         }
         friendshipDbStorage.deleteFriend(id, friendId);
-        // person.get().deleteFriend(friend.get().getId());
-        //  friend.get().deleteFriend(person.get().getId());
     }
 
 
@@ -131,10 +129,6 @@ public class UserService {
         }
         List<Long> friendsId = friendshipDbStorage.getAllFriends(userId);
         List<User> users = userDbStorage.getAllUsers();
-        /*   List<User> friends = getAllUsers().stream()
-                .filter(user -> friendsId.contains(user.getId()))
-                .collect(Collectors.toList());*/
-        //  return friends;
         return getFriends(friendsId, users);
     }
 
