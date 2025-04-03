@@ -59,4 +59,4 @@ class UserDbTest {
                 .hasValueSatisfying(user -> assertThat(user).hasFieldOrPropertyWithValue("email", "AE"));
     }
 
-} 
+}
