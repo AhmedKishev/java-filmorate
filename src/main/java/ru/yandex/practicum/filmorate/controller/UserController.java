@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.UserService;
-import ru.yandex.practicum.filmorate.storages.InMemoryUserStorage;
 
 import java.util.*;
 
@@ -14,22 +13,30 @@ import java.util.*;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final InMemoryUserStorage inMemoryUserStorage;
     private final UserService userService;
 
     @Autowired
-    public UserController(InMemoryUserStorage inMemoryUserStorage,
-                          UserService userService) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
 
     @GetMapping
     public Collection<User> getAllUsers() {
-        return inMemoryUserStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
+    @PostMapping
+    public User addUser(@Valid @RequestBody User user) {
+        userService.addUser(user);
+        return user;
+    }
+
+
+    @PutMapping
+    public User updateUser(@Valid @RequestBody User user) {
+        return userService.updateUser(user);
+    }
 
     @PutMapping("/{id}/friends/{friend-Id}")
     public List<User> addFriend(@PathVariable("id") int id,
@@ -54,16 +61,5 @@ public class UserController {
         return userService.getFriends(id);
     }
 
-    @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        inMemoryUserStorage.addUser(user);
-        return user;
-    }
-
-
-    @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        return inMemoryUserStorage.updateUser(user);
-    }
 
 }

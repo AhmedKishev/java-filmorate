@@ -1,84 +1,135 @@
 package ru.yandex.practicum.filmorate.services;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
-import ru.yandex.practicum.filmorate.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.interfaces.UserStorage;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.dao.*;
 
+import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+
+import java.time.LocalDate;
 import java.util.*;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
+
 @Service
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
+@Slf4j
 public class FilmService {
-    private Map<Long, List<Long>> likeForFilm = new HashMap<>();
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    final FilmDbStorage filmDbStorage;
+    final UserDbStorage userDbStorage;
+    final LikesDbStorage likesDbStorage;
+    final GenreDbStorage genreDbStorage;
+    final MpaDbStorage mpaDbStorage;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
-
-    private Optional<User> findUserForId(long idUser) {
-        List<User> users = userStorage.getAllUsers();
-        return users.stream()
-                .filter(user -> user.getId() == idUser)
-                .findFirst();
-    }
-
-    public void addLikeForFilm(long idFilm, long idUser) {
-        Optional<User> findUser = findUserForId(idUser);
-        if (findUser.isEmpty()) {
-            throw new ObjectNotFound("Пользователь не найден");
+    public Film create(Film film) {
+        if (film.getName().isEmpty()) {
+            log.info("Ошибка при добавлении фильма. Название фильма не может быть пустым");
+            throw new ValidationException("Название фильма не может быть пустым");
         }
-        if (likeForFilm.containsKey(idUser)) {
-            if (likeForFilm.get(idUser).contains(idFilm)) {
-                throw new RuntimeException("Пользователь с id " + idUser + " ставил лайк");
+        if (film.getDescription().length() > 200) {
+            log.info("Ошибка при добавлении фильма. Описание не может быть больше 200 символов");
+            throw new ValidationException("Описание не может быть больше 200 символов");
+        }
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            log.info("Ошибка при добавлении фильма. Дата релиза — не раньше 28 декабря 1895 года");
+            throw new ValidationException("Дата релиза не раньше 28 декабря 1895 года");
+        }
+        if (film.getDuration() < 0) {
+            log.info("Ошибка при добавлении фильма. Длительность фильма должна быть положительным числом");
+            throw new ValidationException("Длительность фильма должна быть положительным числом");
+        }
+
+        if (film.getMpa().getId() > 5 || film.getMpa().getId() < 1) {
+            throw new ObjectNotFound("Неверный MPA");
+        }
+        if (!(film.getGenres() == null)) {
+            if (!film.getGenres().stream().filter(genre -> genre.getId() > 6).collect(Collectors.toSet()).isEmpty()) {
+                throw new ObjectNotFound("Такого жанра не существует");
             }
         }
-        Optional<Film> findFilm = filmStorage.getAllFilms().stream()
-                .filter(film -> film.getId() == idFilm)
-                .findFirst();
-        if (findFilm.isPresent()) {
-            findFilm.get().setLikes(findFilm.get().getLikes() + 1);
-        } else throw new ObjectNotFound("Фильм не найден");
-        if (likeForFilm.containsKey(idUser)) {
-            likeForFilm.get(idUser).add(idFilm);
+        return filmDbStorage.create(film);
+    }
+
+    public Film update(Film film) {
+        if (filmDbStorage.findFilmById(film.getId()).isEmpty()) {
+            throw new ObjectNotFound("Фильм не найден.");
         }
-    }
-
-    public void deleteLikeFilm(long id, long userId) {
-        Optional<User> findUser = findUserForId(userId);
-        if (findUser.isEmpty()) {
-            throw new ObjectNotFound("Пользователь не найден");
+        if (film.getId() == null) {
+            log.info("Ошибка при изменении информации о фильме. Не введен id фильма");
+            throw new ValidationException("Не введен id фильма");
         }
-        Optional<Film> findFilm = filmStorage.getAllFilms().stream()
-                .filter(film -> film.getId() == id)
-                .findFirst();
-        if (findFilm.isPresent()) {
-            findFilm.get().setLikes(findFilm.get().getLikes() - 1);
-        } else throw new ObjectNotFound("Фильм не найден");
+        if (film.getDescription().length() > 200) {
+            log.info("Ошибка при изменении информации о фильме. Описание не может быть больше 200 символов");
+            throw new ValidationException("Описание не может быть больше 200 символов");
+        }
+        if (film.getDuration() < 0) {
+            log.info("Ошибка при изменении информации о фильме. Длительность фильма должна быть положительным числом");
+            throw new ValidationException("Длительность фильма должна быть положительным числом");
+        }
+        if (filmDbStorage.findFilmById(film.getId()).isEmpty()) {
+            throw new ObjectNotFound("Фильм не найден.");
+        }
+        if (film.getMpa().getId() > 5 || film.getMpa().getId() < 1) {
+            throw new ObjectNotFound("Неверный MPA");
+        }
+        return filmDbStorage.update(film);
     }
 
-    public List<Film> getFilmsForLike(int count) {
-        Comparator<Film> comparatorForSort = new Comparator<Film>() {
-            @Override
-            public int compare(Film o1, Film o2) {
-                return o2.getLikes() - o1.getLikes();
-            }
-        };
-        List<Film> sortFilms = filmStorage.getAllFilms().stream()
-                .sorted(comparatorForSort)
-                .collect(Collectors.toList());
-        if (count > filmStorage.getAllFilms().size()) {
-            return sortFilms.subList(0, filmStorage.getAllFilms().size());
-        } else return sortFilms.subList(0, count);
+    public List<Film> findAllFilms() {
+        List<Film> films = filmDbStorage.findAllFilms();
+        return films;
     }
 
+    public Film findFilmById(int id) {
+        Film film = filmDbStorage.findFilmById(id).get();
+        if (id == 10) {
+            log.info(film.toString());
+        }
+        return film;
+    }
+
+    public void addLike(int id, int userId) {
+        if (userDbStorage.findById(id).isEmpty() || userDbStorage.findById(userId).isEmpty()) {
+            throw new ObjectNotFound("Пользователь не найден.");
+        }
+        likesDbStorage.addLike(id, userId);
+    }
+
+    public void removeLike(int id, int userId) {
+        if (userDbStorage.findById(id).isEmpty() || userDbStorage.findById(userId).isEmpty()) {
+            throw new ObjectNotFound("Пользователь не найден.");
+        }
+        likesDbStorage.deleteLike(id, userId);
+    }
+
+    public List<Film> findPopular(int count) {
+        List<Film> films = filmDbStorage.findPopular(count);
+        genreDbStorage.findAllGenresByFilm(films);
+        return films;
+    }
+
+    public List<MPA> findAllMpa() {
+        return mpaDbStorage.findAllMpa();
+    }
+
+    public MPA findMpaById(int id) {
+        return mpaDbStorage.findMpaById(id).orElseThrow(() -> new ObjectNotFound("Рейтинг MPA не найден."));
+    }
+
+    public List<Genre> findAllGenres() {
+        return genreDbStorage.findAllGenres();
+    }
+
+    public Genre findGenreById(int id) {
+        return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
+    }
 }

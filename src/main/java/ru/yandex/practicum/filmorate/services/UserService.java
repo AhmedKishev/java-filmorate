@@ -1,31 +1,34 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FriendshipDbStorage;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
-import ru.yandex.practicum.filmorate.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class UserService {
-
-    private UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    final UserDbStorage userDbStorage;
+    final FriendshipDbStorage friendshipDbStorage;
 
     public List<User> addFriend(int id, int friendId) {
-        Optional<User> person = userStorage.getAllUsers().stream()
+        Optional<User> person = getAllUsers().stream()
                 .filter(user -> user.getId() == id)
                 .findFirst();
-        Optional<User> friend = userStorage.getAllUsers().stream()
+        Optional<User> friend = getAllUsers().stream()
                 .filter(user -> user.getId() == friendId)
                 .findFirst();
         if (person.isEmpty()) {
@@ -34,16 +37,15 @@ public class UserService {
         if (friend.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
         }
-        person.get().setFriend(friend.get().getId());
-        friend.get().setFriend(person.get().getId());
-        return List.of(person.get(), friend.get());
+        friendshipDbStorage.addFriend(id, friendId);
+        return getFriends(id);
     }
 
     public void deleteFriend(int id, int friendId) {
-        Optional<User> person = userStorage.getAllUsers().stream()
+        Optional<User> person = getAllUsers().stream()
                 .filter(user -> user.getId() == id)
                 .findFirst();
-        Optional<User> friend = userStorage.getAllUsers().stream()
+        Optional<User> friend = getAllUsers().stream()
                 .filter(user -> user.getId() == friendId)
                 .findFirst();
         if (person.isEmpty()) {
@@ -52,29 +54,95 @@ public class UserService {
         if (friend.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
         }
-        person.get().deleteFriend(friend.get().getId());
-        friend.get().deleteFriend(person.get().getId());
+        friendshipDbStorage.deleteFriend(id, friendId);
+        // person.get().deleteFriend(friend.get().getId());
+        //  friend.get().deleteFriend(person.get().getId());
     }
 
-    public List<User> getFriends(int id) {
-        Optional<User> person = userStorage.getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        if (person.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + id + " не существует");
+
+    public void addUser(User user) {
+        if (user.getEmail() == null) {
+            log.info("Ошибка при добавлении пользователя. Электронный адрес не может быть пустой");
+            throw new ValidationException("Электронный адрес не может быть пустой");
         }
-        Set<Long> friendsId = person.get().getFriend();
-        List<User> friends = userStorage.getAllUsers().stream()
+        if (!user.getEmail().contains("@")) {
+            log.info("Ошибка при добавлении пользователя. Электронный адрес должен содержать @");
+            throw new ValidationException("Электронный адрес должен содержать @");
+        }
+        if (user.getLogin() == null) {
+            log.info("Ошибка при добавлении пользователя. Логин не может быть пустым");
+            throw new ValidationException("Логин не может быть пустым");
+        }
+        if (user.getLogin().contains(" ")) {
+            log.info("Ошибка при добавлении пользователя. Логин не может содержать пробелы");
+            throw new ValidationException("Логин не может содержать пробелы");
+        }
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.info("Ошибка при добавлении пользователя. Неверно введена дата рождения");
+            throw new ValidationException("Неверно введена дата рождения");
+        }
+
+
+        userDbStorage.addUser(user);
+    }
+
+    public User updateUser(User user) {
+        if (user.getId() == null) {
+            log.info("Пользователь не найден в update");
+            throw new ObjectNotFound("Данного пользователя не существует");
+        }
+        Optional<User> isUser = userDbStorage.findById(user.getId());
+        if (isUser.isEmpty()) {
+            log.info("Пользователь не найден в update");
+            throw new ObjectNotFound("Не удалось обновить");
+        }
+        if (user.getEmail() == null) {
+            log.info("Ошибка при добавлении пользователя. Email не может быть пустым");
+            throw new ValidationException("Email не может быть пустым");
+        }
+        if (user.getLogin() == null) {
+            log.info("Ошибка при добавлении пользователя. Логин не может быть пустым");
+            throw new ValidationException("Логин не может быть пустым");
+        }
+        return userDbStorage.updateUser(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userDbStorage.getAllUsers();
+    }
+
+    private List<User> getFriends(List<Long> friendsId,
+                                  List<User> allUsers) {
+        return allUsers.stream()
                 .filter(user -> friendsId.contains(user.getId()))
                 .collect(Collectors.toList());
-        return friends;
+    }
+
+
+    public List<User> getFriends(long userId) {
+        Optional<User> person = getAllUsers().stream()
+                .filter(user -> user.getId() == userId)
+                .findFirst();
+        if (person.isEmpty()) {
+            throw new ObjectNotFound("Пользователя с id " + userId + " не существует");
+        }
+        List<Long> friendsId = friendshipDbStorage.getAllFriends(userId);
+        List<User> users = userDbStorage.getAllUsers();
+        /*   List<User> friends = getAllUsers().stream()
+                .filter(user -> friendsId.contains(user.getId()))
+                .collect(Collectors.toList());*/
+        //  return friends;
+        return getFriends(friendsId, users);
     }
 
     public List<User> getListFriendsWithOtherUser(int id, int otherId) {
-        Optional<User> person = userStorage.getAllUsers().stream()
+        Optional<User> person = getAllUsers().stream()
                 .filter(user -> user.getId() == id)
                 .findFirst();
-        Optional<User> other = userStorage.getAllUsers().stream()
+        Optional<User> other = getAllUsers().stream()
                 .filter(user -> user.getId() == otherId)
                 .findFirst();
         if (person.isEmpty()) {
@@ -84,14 +152,14 @@ public class UserService {
             throw new ObjectNotFound("Пользователя с id " + otherId + " не существует");
         }
 
-        Set<Long> friendsForFirstUser = person.get().getFriend();
-        Set<Long> friendsForSecondUser = other.get().getFriend();
+        List<Long> friendsForFirstUser = friendshipDbStorage.getAllFriends(id);
+        List<Long> friendsForSecondUser = friendshipDbStorage.getAllFriends(otherId);
 
-        Set<Long> intersection = friendsForSecondUser.stream()
+        List<Long> intersection = friendsForSecondUser.stream()
                 .filter(friendsForFirstUser::contains)
-                .collect(Collectors.toSet());
+                .toList();
 
-        return userStorage.getAllUsers().stream()
+        return getAllUsers().stream()
                 .filter(user -> intersection.contains(user.getId()))
                 .collect(Collectors.toList());
     }
