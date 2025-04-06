@@ -44,3 +44,7 @@ build/
 
 *.db
 db/*
+
+# .gitignore
+*.DS_Store
+bin/
