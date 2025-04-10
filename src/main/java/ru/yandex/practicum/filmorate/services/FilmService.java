@@ -145,6 +145,7 @@ public class FilmService {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
     }
 
+
     public Director updateDirector(Director director) {
         return directorsDbStorage.update(director);
     }
@@ -163,6 +164,13 @@ public class FilmService {
         } else if (sortBy.equals("likes")) {
             return filmDbStorage.getAllFilmsByDirectorFromLikes(directorId);
         } else throw new ValidationException("Такой сортировки не существует");
+
+
+    public List<Film> getRecommendationsById(int id) {
+        if (userDbStorage.findById(id).isEmpty()) {
+            throw new ObjectNotFound("Пользователь не найден.");
+        }
+        return filmDbStorage.findRecommendationsByUserId(id);
 
     }
 }
