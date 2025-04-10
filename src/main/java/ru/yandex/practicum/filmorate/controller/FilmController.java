@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.services.FilmService;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/films")
@@ -33,9 +35,11 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
+        log.info("Запрос на добавление фильма: {}", film);
         filmService.create(film);
         return film;
     }
+
 
     @DeleteMapping(PATH_ID_FILM_TO_USER_ID)
     public void deleteLike(@PathVariable("id") int id,
@@ -55,9 +59,25 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getMostPopular(@RequestParam(defaultValue = "10") int count) {
+    public List<Film> getPopular(
+            @RequestParam(defaultValue = "10") int count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
+
+        System.out.println("Контроллер получил: count=" + count + ", genreId=" + genreId + ", year=" + year);
+
+        if (genreId != null || year != null) {
+            return filmService.findPopularByGenreAndYear(count, genreId, year);
+        }
         return filmService.findPopular(count);
     }
+
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable("filmId") int filmId){
+        filmService.deleteFilmById(filmId);
+    }
+
+
 
 
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,6 +14,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Repository
 public class LikesDbStorage extends BaseRepository<Integer> {
@@ -21,6 +23,7 @@ public class LikesDbStorage extends BaseRepository<Integer> {
             "VALUES (?,?)";
     static final String DELETE_LIKE_FOR_FILM_BY_ID_USER = "DELETE FROM likes WHERE film_id=? AND user_id=?";
     static final String GET_ALL_RECORDS = "SELECT * FROM likes";
+    static final String GET_LIKES = "SELECT COUNT(user_id) FROM likes WHERE film_id = ?";
 
     public LikesDbStorage(JdbcTemplate jdbc, RowMapper<Integer> mapper) {
         super(jdbc, mapper);
@@ -35,6 +38,7 @@ public class LikesDbStorage extends BaseRepository<Integer> {
         insertForTableLike(ADD_LIKE_FOR_FILM,
                 idFilm,
                 idUser);
+        log.info("Добавлен лайк: filmId={}, userId={}", idFilm, idUser);
     }
 
     public void deleteLike(long idFilm, long idUser) {
@@ -58,6 +62,11 @@ public class LikesDbStorage extends BaseRepository<Integer> {
             return ps;
         }, keyHolder);
 
+    }
+    public int getLikes(int filmId) {
+        String sql = GET_LIKES;
+        Integer count = jdbc.queryForObject(sql, Integer.class, filmId);
+        return count != null ? count : 0;
     }
 
 }

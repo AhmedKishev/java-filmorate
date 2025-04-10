@@ -158,4 +158,11 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteUserById(int userId){
+        if(userDbStorage.findById(userId).isEmpty()){
+            throw new ObjectNotFound("Пользователь с id=" + userId + "не найден");
+        }
+        userDbStorage.deleteUser(userId);
+    }
+
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Repository
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserDbStorage extends BaseRepository<User> {
@@ -21,6 +23,7 @@ public class UserDbStorage extends BaseRepository<User> {
     static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id=?";
     static final String UPDATE_QUERY = "UPDATE users SET email=?, login=?,name=?,birthday=? WHERE user_id=?";
     static final String FIND_ALL_USERS = "SELECT * FROM users";
+    static final String DELETE_USER = "DELETE FROM users WHERE user_id =?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);
@@ -59,5 +62,11 @@ public class UserDbStorage extends BaseRepository<User> {
 
     public List<User> getAllUsers() {
         return findMany(FIND_ALL_USERS);
+    }
+
+    public void deleteUser(int id){
+        jdbc.update(DELETE_USER, id);
+        log.info("Удален пользователь с ID: {}", id);
+
     }
 }

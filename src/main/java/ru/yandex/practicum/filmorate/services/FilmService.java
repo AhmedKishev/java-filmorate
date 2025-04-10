@@ -114,6 +114,11 @@ public class FilmService {
     public List<Film> findPopular(int count) {
         List<Film> films = filmDbStorage.findPopular(count);
         genreDbStorage.findAllGenresByFilm(films);
+
+        for (Film film : films) {
+            film.setLikes(likesDbStorage.getLikes(film.getId()));
+        }
+
         return films;
     }
 
@@ -131,6 +136,23 @@ public class FilmService {
 
     public Genre findGenreById(int id) {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
+    }
+
+    public List<Film> findPopularByGenreAndYear(int count, Integer genreId, Integer year) {
+        List<Film> films = filmDbStorage.findPopularByGenreAndYear(count, genreId, year);
+        genreDbStorage.findAllGenresByFilm(films);
+
+        for (Film film : films) {
+            film.setLikes(likesDbStorage.getLikes(film.getId()));
+        }
+
+        return films;
+    }
+    public void deleteFilmById(int filmId){
+        if(filmDbStorage.findFilmById(filmId).isEmpty()){
+            throw new ObjectNotFound("Фильм с id=" + filmId + "не найден");
+        }
+        filmDbStorage.deleteFilm(filmId);
     }
 
 }
