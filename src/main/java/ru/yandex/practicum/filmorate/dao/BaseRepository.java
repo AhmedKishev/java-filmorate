@@ -40,8 +40,7 @@ public class BaseRepository<T> {
     Long insert(String query, Object... params) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             for (int idx = 0; idx < params.length; idx++) {
                 ps.setObject(idx + 1, params[idx]);
             }

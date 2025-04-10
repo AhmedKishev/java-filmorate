@@ -25,12 +25,8 @@ public class UserService {
     final FriendshipDbStorage friendshipDbStorage;
 
     public List<User> addFriend(int id, int friendId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        Optional<User> friend = getAllUsers().stream()
-                .filter(user -> user.getId() == friendId)
-                .findFirst();
+        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == id).findFirst();
+        Optional<User> friend = getAllUsers().stream().filter(user -> user.getId() == friendId).findFirst();
         if (person.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + id + " не существует");
         }
@@ -42,12 +38,8 @@ public class UserService {
     }
 
     public void deleteFriend(int id, int friendId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        Optional<User> friend = getAllUsers().stream()
-                .filter(user -> user.getId() == friendId)
-                .findFirst();
+        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == id).findFirst();
+        Optional<User> friend = getAllUsers().stream().filter(user -> user.getId() == friendId).findFirst();
         if (person.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + id + " не существует");
         }
@@ -112,18 +104,13 @@ public class UserService {
         return userDbStorage.getAllUsers();
     }
 
-    private List<User> getFriends(List<Long> friendsId,
-                                  List<User> allUsers) {
-        return allUsers.stream()
-                .filter(user -> friendsId.contains(user.getId()))
-                .collect(Collectors.toList());
+    private List<User> getFriends(List<Long> friendsId, List<User> allUsers) {
+        return allUsers.stream().filter(user -> friendsId.contains(user.getId())).collect(Collectors.toList());
     }
 
 
     public List<User> getFriends(long userId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == userId)
-                .findFirst();
+        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == userId).findFirst();
         if (person.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + userId + " не существует");
         }
@@ -133,12 +120,8 @@ public class UserService {
     }
 
     public List<User> getListFriendsWithOtherUser(int id, int otherId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        Optional<User> other = getAllUsers().stream()
-                .filter(user -> user.getId() == otherId)
-                .findFirst();
+        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == id).findFirst();
+        Optional<User> other = getAllUsers().stream().filter(user -> user.getId() == otherId).findFirst();
         if (person.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + id + " не существует");
         }
@@ -149,17 +132,13 @@ public class UserService {
         List<Long> friendsForFirstUser = friendshipDbStorage.getAllFriends(id);
         List<Long> friendsForSecondUser = friendshipDbStorage.getAllFriends(otherId);
 
-        List<Long> intersection = friendsForSecondUser.stream()
-                .filter(friendsForFirstUser::contains)
-                .toList();
+        List<Long> intersection = friendsForSecondUser.stream().filter(friendsForFirstUser::contains).toList();
 
-        return getAllUsers().stream()
-                .filter(user -> intersection.contains(user.getId()))
-                .collect(Collectors.toList());
+        return getAllUsers().stream().filter(user -> intersection.contains(user.getId())).collect(Collectors.toList());
     }
 
-    public void deleteUserById(int userId){
-        if(userDbStorage.findById(userId).isEmpty()){
+    public void deleteUserById(int userId) {
+        if (userDbStorage.findById(userId).isEmpty()) {
             throw new ObjectNotFound("Пользователь с id=" + userId + "не найден");
         }
         userDbStorage.deleteUser(userId);

@@ -24,10 +24,8 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmDbStorage extends BaseRepository<Film> {
 
-    private static final String SELECT_FILMS = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
-            "mpa.rating_id, mpa.name AS mpa_name " +
-            "FROM films AS f " +
-            "INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ";
+    private static final String SELECT_FILMS = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " + "mpa.rating_id, mpa.name AS mpa_name " + "FROM films AS f " + "INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ";
+    private static final String DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -38,16 +36,15 @@ public class FilmDbStorage extends BaseRepository<Film> {
         log.info("Создание фильма: name={}, releaseDate={}", film.getName(), film.getReleaseDate());
         String sql = "INSERT INTO films (name, description, releaseDate, duration, rating_id) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(
-                connection -> {
-                    PreparedStatement ps = connection.prepareStatement(sql, new String[]{"film_id"});
-                    ps.setString(1, film.getName());
-                    ps.setString(2, film.getDescription());
-                    ps.setDate(3, Date.valueOf(film.getReleaseDate()));
-                    ps.setInt(4, (int) film.getDuration());
-                    ps.setInt(5, film.getMpa().getId());
-                    return ps;
-                }, keyHolder);
+        jdbc.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"film_id"});
+            ps.setString(1, film.getName());
+            ps.setString(2, film.getDescription());
+            ps.setDate(3, Date.valueOf(film.getReleaseDate()));
+            ps.setInt(4, (int) film.getDuration());
+            ps.setInt(5, film.getMpa().getId());
+            return ps;
+        }, keyHolder);
         film.setId(keyHolder.getKey().intValue());
         log.info("Фильм добавлен с ID: {}", film.getId());
         if (film.getGenres() != null) {
@@ -66,10 +63,8 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
     public Film update(Film film) {
         int id = film.getId();
-        String sql = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, rating_id = ? " +
-                "WHERE film_id = ?";
-        jdbc.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
-                film.getMpa().getId(), id);
+        String sql = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, rating_id = ? " + "WHERE film_id = ?";
+        jdbc.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), id);
         return film;
     }
 
@@ -98,18 +93,12 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
 
     public List<Film> findPopular(int count) {
-        String sql = "LEFT JOIN likes ON f.film_id = likes.film_id " +
-                "GROUP BY f.film_id " +
-                "ORDER BY COUNT(likes.film_id) DESC " +
-                "LIMIT ?";
+        String sql = "LEFT JOIN likes ON f.film_id = likes.film_id " + "GROUP BY f.film_id " + "ORDER BY COUNT(likes.film_id) DESC " + "LIMIT ?";
         return jdbc.query(SELECT_FILMS + sql, (rs, rowNum) -> makeFilm(rs), count);
     }
 
     private List<Genre> getGenres(int id) {
-        String getGenre = "SELECT g.genre_id,g.name " +
-                " FROM film_genres AS fg" +
-                " INNER JOIN genres AS g ON g.genre_id=fg.genre_id " +
-                "WHERE fg.film_id=?";
+        String getGenre = "SELECT g.genre_id,g.name " + " FROM film_genres AS fg" + " INNER JOIN genres AS g ON g.genre_id=fg.genre_id " + "WHERE fg.film_id=?";
         return jdbc.query(getGenre, (rs, rowNum) -> makeGenre(rs), id);
     }
 
@@ -132,15 +121,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
         }
 
         // Создаём объект Film
-        Film film = Film.builder()
-                .id(id)
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(rs.getDate("releaseDate").toLocalDate())
-                .duration(rs.getInt("duration"))
-                .mpa(new MPA(rs.getInt("rating_id"), rs.getString("mpa_name")))
-                .genres(genreSet)
-                .likes(0) // чтобы в JSON был этот ключ
+        Film film = Film.builder().id(id).name(rs.getString("name")).description(rs.getString("description")).releaseDate(rs.getDate("releaseDate").toLocalDate()).duration(rs.getInt("duration")).mpa(new MPA(rs.getInt("rating_id"), rs.getString("mpa_name"))).genres(genreSet).likes(0) // чтобы в JSON был этот ключ
                 .build();
 
         log.debug("Загружен фильм из БД: name={}, releaseDate={}", film.getName(), film.getReleaseDate());
@@ -152,12 +133,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
         log.debug("Параметры метода: count={}, genreId={}, year={}", count, genreId, year);
 
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, ")
-                .append("mpa.rating_id, mpa.name AS mpa_name ")
-                .append("FROM films AS f ")
-                .append("INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ")
-                .append("LEFT JOIN likes ON f.film_id = likes.film_id ")
-                .append("LEFT JOIN film_genres AS fg ON f.film_id = fg.film_id ");
+        sqlBuilder.append("SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, ").append("mpa.rating_id, mpa.name AS mpa_name ").append("FROM films AS f ").append("INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ").append("LEFT JOIN likes ON f.film_id = likes.film_id ").append("LEFT JOIN film_genres AS fg ON f.film_id = fg.film_id ");
 
         List<Object> params = new ArrayList<>();
         List<String> conditions = new ArrayList<>();
@@ -175,18 +151,16 @@ public class FilmDbStorage extends BaseRepository<Film> {
             sqlBuilder.append("WHERE ").append(String.join(" AND ", conditions)).append(" ");
         }
 
-        sqlBuilder.append("GROUP BY f.film_id, mpa.rating_id, mpa.name ")
-                .append("ORDER BY COUNT(likes.user_id) DESC ")
-                .append("LIMIT ?");
+        sqlBuilder.append("GROUP BY f.film_id, mpa.rating_id, mpa.name ").append("ORDER BY COUNT(likes.user_id) DESC ").append("LIMIT ?");
         log.debug("Итоговый SQL-запрос: {}", sqlBuilder);
 
         params.add(count);
 
         return jdbc.query(sqlBuilder.toString(), (rs, rowNum) -> makeFilm(rs), params.toArray());
     }
-    public void deleteFilm(int id){
-        String sql = "DELETE FROM films WHERE film_id = ?";
-        jdbc.update(sql, id);
+
+    public void deleteFilm(int id) {
+        jdbc.update(DELETE_FILM, id);
         log.info("Удален фильм с ID: {}", id);
     }
 }
