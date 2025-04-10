@@ -171,7 +171,6 @@ public class FilmDbStorage extends BaseRepository<Film> {
     }
 
 
-
     public List<Film> getAllFilmsByDirectorSortByDate(Long directorId) {
         String getAllFilms = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
                 "f.rating_id, m.name AS mpa_name " +
@@ -194,21 +193,18 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 "WHERE d.director_id = ?\n" +
                 "GROUP BY f.film_id, f.name, f.description, f.releaseDate, f.duration\n" +
                 "ORDER BY COUNT(l.user_id) DESC;\n";
-     
-
         return jdbc.query(getAllFilms, (rs, rowNum) -> makeFilm(rs), directorId);
     }
-  
+
     public List<Film> findRecommendationsByUserId(int id) {
-        String sqlUsersIds =
-                "SELECT fl_other.user_id " +
-                        "FROM LIKES fl_target " +
-                        "JOIN LIKES fl_other ON fl_target.film_id = fl_other.film_id " +
-                        "WHERE fl_target.user_id = ? " +
-                        "  AND fl_other.user_id != ? " +
-                        "GROUP BY fl_other.user_id " +
-                        "ORDER BY COUNT(*) DESC " +
-                        "LIMIT 5";
+        String sqlUsersIds = "SELECT fl_other.user_id " +
+                "FROM LIKES fl_target " +
+                "JOIN LIKES fl_other ON fl_target.film_id = fl_other.film_id " +
+                "WHERE fl_target.user_id = ? " +
+                "  AND fl_other.user_id != ? " +
+                "GROUP BY fl_other.user_id " +
+                "ORDER BY COUNT(*) DESC " +
+                "LIMIT 5";
 
         List<Integer> similarUsers = jdbc.queryForList(sqlUsersIds, Integer.class, id, id);
 
