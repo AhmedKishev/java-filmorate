@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.dao.*;
 
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -29,8 +30,9 @@ public class FilmService {
     final LikesDbStorage likesDbStorage;
     final GenreDbStorage genreDbStorage;
     final MpaDbStorage mpaDbStorage;
+    final DirectorsDbStorage directorsDbStorage;
 
-    public Film create(Film film) {
+    public Film createFilm(Film film) {
         if (film.getName().isEmpty()) {
             log.info("Ошибка при добавлении фильма. Название фильма не может быть пустым");
             throw new ValidationException("Название фильма не может быть пустым");
@@ -59,7 +61,20 @@ public class FilmService {
         return filmDbStorage.create(film);
     }
 
-    public Film update(Film film) {
+
+    public Director createDirector(Director director) {
+        if (director.getName() == null) {
+            throw new ValidationException("У режиссера должно быть имя");
+        }
+        return directorsDbStorage.create(director);
+    }
+
+
+    public List<Director> getAllDirectors() {
+        return directorsDbStorage.getAllDirectors();
+    }
+
+    public Film updateFilm(Film film) {
         if (filmDbStorage.findFilmById(film.getId()).isEmpty()) {
             throw new ObjectNotFound("Фильм не найден.");
         }
@@ -133,4 +148,24 @@ public class FilmService {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
     }
 
+    public Director updateDirector(Director director) {
+        return directorsDbStorage.update(director);
+    }
+
+    public void deleteDirector(long id) {
+        directorsDbStorage.deleteDirector(id);
+    }
+
+    public Optional<Director> getDirectorById(long id) {
+        return directorsDbStorage.getDirectorById(id);
+    }
+
+    public List<Film> getAllFilmsByDirector(Long directorId, String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmDbStorage.getAllFilmsByDirectorSortByDate(directorId);
+        } else if (sortBy.equals("likes")) {
+            return filmDbStorage.getAllFilmsByDirectorFromLikes(directorId);
+        } else throw new ValidationException("Такой сортировки не существует");
+
+    }
 }

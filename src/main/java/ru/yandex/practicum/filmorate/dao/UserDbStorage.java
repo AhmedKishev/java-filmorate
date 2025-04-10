@@ -37,8 +37,7 @@ public class UserDbStorage extends BaseRepository<User> {
     }
 
 
-    public User updateUser(
-            User request) {
+    public User updateUser(User request) {
         User updateUser = this.findById(request.getId())
                 .map(user -> UserMapper.changeVariable(user, request))
                 .orElseThrow(() -> new ObjectNotFound("Пользователь не найден"));

@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -50,6 +51,9 @@ public class FilmDbStorage extends BaseRepository<Film> {
         if (film.getGenres() != null) {
             updateGenres(film.getGenres(), film.getId());
         }
+        if (film.getDirectors() != null) {
+            updateDirectors(film.getDirectors(), film.getId());
+        }
         return film;
     }
 
@@ -60,6 +64,9 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 "WHERE film_id = ?";
         jdbc.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), id);
+        if (film.getDirectors() != null) {
+            updateDirectors(film.getDirectors(), film.getId());
+        }
         return film;
     }
 
@@ -73,6 +80,17 @@ public class FilmDbStorage extends BaseRepository<Film> {
             }
         }
     }
+
+    private void updateDirectors(Set<Director> directors, Integer idFilm) {
+        if (!directors.isEmpty()) {
+            final String SET_FILM_DIRECTORS = "INSERT INTO film_directors (film_id,director_id) " +
+                    "VALUES(?, ?)";
+            for (Director director : directors) {
+                jdbc.update(SET_FILM_DIRECTORS, idFilm, director.getId());
+            }
+        }
+    }
+
 
     public List<Film> findAllFilms() {
         String sql = "ORDER BY f.film_id";
@@ -102,6 +120,16 @@ public class FilmDbStorage extends BaseRepository<Film> {
         return jdbc.query(getGenre, (rs, rowNum) -> makeGenre(rs), id);
     }
 
+
+    private List<Director> getDirectors(int id) {
+        String getDirectors = "SELECT d.director_id,d.name " +
+                " FROM film_directors AS fd" +
+                " INNER JOIN directors AS d ON d.director_id=fd.director_id " +
+                " WHERE fd.film_id=?";
+        return jdbc.query(getDirectors, (rs, rowNum) -> makeDirector(rs), id);
+    }
+
+
     private Genre makeGenre(ResultSet rs) throws SQLException {
         Genre genre = new Genre(0, "");
         genre.setId(rs.getInt("genre_id"));
@@ -109,9 +137,17 @@ public class FilmDbStorage extends BaseRepository<Film> {
         return genre;
     }
 
+    private Director makeDirector(ResultSet rs) throws SQLException {
+        Director director = new Director();
+        director.setId(rs.getLong("director_id"));
+        director.setName(rs.getString("name"));
+        return director;
+    }
+
     private Film makeFilm(ResultSet rs) throws SQLException {
         int id = rs.getInt("film_id");
         List<Genre> genres = getGenres(id);
+        List<Director> directors = getDirectors(id);
         Film film = Film.builder()
                 .id(id)
                 .name(rs.getString("name"))
@@ -121,12 +157,45 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 .mpa(new MPA(rs.getInt("rating_id"), rs.getString("mpa_name")))
                 .build();
         Set<Genre> genreSet = new LinkedHashSet<>();
+        Set<Director> directorSet = new LinkedHashSet<>();
         if (!genres.isEmpty()) {
             Collections.reverse(genres);
             genreSet.addAll(genres);
         }
+        if (!directors.isEmpty()) {
+            directorSet.addAll(directors);
+        }
+        film.setDirectors(directorSet);
         film.setGenres(genreSet);
         return film;
     }
 
+
+    public List<Film> getAllFilmsByDirectorSortByDate(Long directorId) {
+        String getAllFilms = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
+                "f.rating_id, m.name AS mpa_name " +
+                "FROM film_directors fd " +
+                "INNER JOIN films f ON f.film_id = fd.film_id " +
+                "LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id " +
+                "WHERE fd.director_id = ? " +
+                "ORDER BY f.releaseDate ";
+        return jdbc.query(getAllFilms, (rs, rowNum) -> makeFilm(rs), directorId);
+    }
+
+    public List<Film> getAllFilmsByDirectorFromLikes(long directorId) {
+        String getAllFilms = "SELECT f.film_id,f.name AS film_name,f.description,f.releaseDate," +
+                "f.duration,f.rating_id,m.name AS mpa_name\n" +
+                "FROM films f\n" +
+                "JOIN film_directors fd ON f.film_id = fd.film_id\n" +
+                "JOIN directors d ON fd.director_id = d.director_id\n" +
+                "LEFT JOIN likes l ON f.film_id = l.film_id\n" +
+                "LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id\n" +
+                "WHERE d.director_id = ?\n" +
+                "GROUP BY f.film_id, f.name, f.description, f.releaseDate, f.duration\n" +
+                "ORDER BY COUNT(l.user_id) DESC;\n";
+        ;
+        ;
+
+        return jdbc.query(getAllFilms, (rs, rowNum) -> makeFilm(rs), directorId);
+    }
 }
