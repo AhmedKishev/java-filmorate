@@ -133,4 +133,10 @@ public class FilmService {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
     }
 
+    public List<Film> getRecommendationsById(int id) {
+        if (userDbStorage.findById(id).isEmpty()) {
+            throw new ObjectNotFound("Пользователь не найден.");
+        }
+        return filmDbStorage.findRecommendationsByUserId(id);
+    }
 }
