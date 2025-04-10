@@ -148,8 +148,9 @@ public class FilmService {
 
         return films;
     }
-    public void deleteFilmById(int filmId){
-        if(filmDbStorage.findFilmById(filmId).isEmpty()){
+
+    public void deleteFilmById(int filmId) {
+        if (filmDbStorage.findFilmById(filmId).isEmpty()) {
             throw new ObjectNotFound("Фильм с id=" + filmId + "не найден");
         }
         filmDbStorage.deleteFilm(filmId);
