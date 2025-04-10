@@ -106,9 +106,6 @@ public class FilmService {
 
     public Film findFilmById(int id) {
         Film film = filmDbStorage.findFilmById(id).get();
-        if (id == 10) {
-            log.info(film.toString());
-        }
         return film;
     }
 
