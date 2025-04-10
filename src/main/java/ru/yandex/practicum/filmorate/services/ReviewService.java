@@ -44,19 +44,19 @@ public class ReviewService {
         return reviewStorage.findReviewsByFilm(filmId, count);
     }
 
-    public void likeReview(int review_id, int userId, boolean isPositive) {
-        validateLike(review_id, userId);
-        reviewStorage.addLike(review_id, userId, isPositive);
+    public void likeReview(int reviewId, int userId, boolean isPositive) {
+        validateLike(reviewId, userId);
+        reviewStorage.addLike(reviewId, userId, isPositive);
     }
 
-    public void removeLike(int review_id, int userId, boolean isPositive) {
-        validateLike(review_id, userId);
-        reviewStorage.removeLike(review_id, userId, isPositive);
+    public void removeLike(int reviewId, int userId, boolean isPositive) {
+        validateLike(reviewId, userId);
+        reviewStorage.removeLike(reviewId, userId, isPositive);
     }
 
-    private void validateLike(int review_id, int userId) {
-        if (reviewStorage.findById(review_id).isEmpty()) {
-            throw new ObjectNotFound("Отзыв с id " + review_id + " не найден.");
+    private void validateLike(int reviewId, int userId) {
+        if (reviewStorage.findById(reviewId).isEmpty()) {
+            throw new ObjectNotFound("Отзыв с id " + reviewId + " не найден.");
         }
         if (userDbStorage.findById(userId).isEmpty()) {
             throw new ObjectNotFound("Пользователь с id " + userId + " не найден.");
