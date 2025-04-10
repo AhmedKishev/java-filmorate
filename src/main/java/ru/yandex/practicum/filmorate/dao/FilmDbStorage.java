@@ -171,6 +171,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
     }
 
 
+
     public List<Film> getAllFilmsByDirectorSortByDate(Long directorId) {
         String getAllFilms = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
                 "f.rating_id, m.name AS mpa_name " +
@@ -197,5 +198,45 @@ public class FilmDbStorage extends BaseRepository<Film> {
         ;
 
         return jdbc.query(getAllFilms, (rs, rowNum) -> makeFilm(rs), directorId);
+=======
+    public List<Film> findRecommendationsByUserId(int id) {
+        String sqlUsersIds =
+                "SELECT fl_other.user_id " +
+                        "FROM LIKES fl_target " +
+                        "JOIN LIKES fl_other ON fl_target.film_id = fl_other.film_id " +
+                        "WHERE fl_target.user_id = ? " +
+                        "  AND fl_other.user_id != ? " +
+                        "GROUP BY fl_other.user_id " +
+                        "ORDER BY COUNT(*) DESC " +
+                        "LIMIT 5";
+
+        List<Integer> similarUsers = jdbc.queryForList(sqlUsersIds, Integer.class, id, id);
+
+        if (similarUsers.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String inPlaceholders = String.join(",",
+                Collections.nCopies(similarUsers.size(), "?")
+        );
+        String filmsSql =
+                "SELECT f.*, mpa.rating_id AS mpa_rating_id, mpa.name AS mpa_name " +
+                        "FROM films f " +
+                        "JOIN LIKES l ON f.film_id = l.film_id " +
+                        "JOIN mpa_rating mpa ON f.rating_id = mpa.rating_id " +
+                        "WHERE l.user_id IN (" + inPlaceholders + ") " +
+                        "  AND f.film_id NOT IN (" +
+                        "    SELECT film_id " +
+                        "    FROM LIKES " +
+                        "    WHERE user_id = ? " +
+                        "  ) " +
+                        "GROUP BY f.film_id " +
+                        "ORDER BY COUNT(l.film_id) DESC " +
+                        "LIMIT 10";
+
+        List<Object> params = new ArrayList<>(similarUsers);
+        params.add(id);
+        return jdbc.query(filmsSql, (rs, rowNum) -> makeFilm(rs), params.toArray());
+
     }
 }
