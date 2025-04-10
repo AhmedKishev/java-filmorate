@@ -80,7 +80,7 @@ public class ReviewController {
         log.info("Deleting review with ID: {}", id);
         reviewService.deleteReview(id);
         log.info("Review with ID {} deleted successfully", id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("");
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -96,7 +96,7 @@ public class ReviewController {
         log.info("Removing like from review with ID: {}, by user: {}", id, userId);
         reviewService.removeLike(id, userId, true);
         log.info("Like removed successfully from review with ID: {}, by user: {}", id, userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("");
     }
 
     @PutMapping("/{id}/dislike/{userId}")
