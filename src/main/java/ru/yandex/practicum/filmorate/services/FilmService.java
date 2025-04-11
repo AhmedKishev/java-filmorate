@@ -173,4 +173,14 @@ public class FilmService {
         return filmDbStorage.findRecommendationsByUserId(id);
 
     }
+
+    public List<Film> getAllFilmsByQuery(String query,
+                                         String by) {
+        return switch (by) {
+            case "director" -> filmDbStorage.getAllFilmsByQueryDirector(query);
+            case "title" -> filmDbStorage.getAllFilmsByQueryTitle(query);
+            case "director,title", "title,director" -> filmDbStorage.getAllFilmsByQueryDirectorAndTitle(query);
+            default -> throw new ObjectNotFound("Поиска по такому критерию не существует");
+        };
+    }
 }
