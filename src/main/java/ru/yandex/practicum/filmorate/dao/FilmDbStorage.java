@@ -24,7 +24,11 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmDbStorage extends BaseRepository<Film> {
 
-    private static final String SELECT_FILMS = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
+    private static final String SELECT_FILMS = "SELECT f.film_id, " +
+            "f.name, " +
+            "f.description, " +
+            "f.releaseDate, " +
+            "f.duration, " +
             "mpa.rating_id, mpa.name AS mpa_name " +
             "FROM films AS f " +
             "INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ";
@@ -113,7 +117,8 @@ public class FilmDbStorage extends BaseRepository<Film> {
     }
 
     private List<Genre> getGenres(int id) {
-        String getGenre = "SELECT g.genre_id,g.name " +
+        String getGenre = "SELECT g.genre_id," +
+                "g.name " +
                 " FROM film_genres AS fg" +
                 " INNER JOIN genres AS g ON g.genre_id=fg.genre_id " +
                 "WHERE fg.film_id=?";
@@ -122,7 +127,8 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
 
     private List<Director> getDirectors(int id) {
-        String getDirectors = "SELECT d.director_id,d.name " +
+        String getDirectors = "SELECT d.director_id," +
+                "d.name " +
                 " FROM film_directors AS fd" +
                 " INNER JOIN directors AS d ON d.director_id=fd.director_id " +
                 " WHERE fd.film_id=?";
@@ -172,7 +178,11 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
 
     public List<Film> getAllFilmsByDirectorSortByDate(Long directorId) {
-        String getAllFilms = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
+        String getAllFilms = "SELECT f.film_id, " +
+                "f.name, " +
+                "f.description," +
+                " f.releaseDate, " +
+                "f.duration, " +
                 "f.rating_id, m.name AS mpa_name " +
                 "FROM film_directors fd " +
                 "INNER JOIN films f ON f.film_id = fd.film_id " +
@@ -234,4 +244,46 @@ public class FilmDbStorage extends BaseRepository<Film> {
         params.add(id);
         return jdbc.query(filmsSql, (rs, rowNum) -> makeFilm(rs), params.toArray());
     }
+
+    public List<Film> getAllFilmsByQueryDirector(String query) {
+        String getAllFilmsByDirector = "SELECT f.film_id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.releaseDate, " +
+                "f.duration," +
+                " f.rating_id," +
+                "m.name AS mpa_name" +
+                " FROM films f" +
+                " JOIN film_directors fd ON f.film_id = fd.film_id " +
+                " JOIN directors d ON fd.director_id = d.director_id " +
+                " LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id" +
+                " WHERE d.name LIKE ?";
+        String searchPattern = "%" + query + "%";
+        return jdbc.query(getAllFilmsByDirector, (rs, rowNum) -> makeFilm(rs), searchPattern);
+    }
+
+    public List<Film> getAllFilmsByQueryTitle(String query) {
+        String getAllFilmsByTitle = "SELECT f.film_id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.releaseDate, " +
+                "f.duration," +
+                " f.rating_id," +
+                "m.name AS mpa_name" +
+                " FROM films f" +
+                " LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id" +
+                " WHERE f.name LIKE ?";
+        String searchPattern = "%" + query + "%";
+        return jdbc.query(getAllFilmsByTitle, (rs, rowNum) -> makeFilm(rs), searchPattern);
+    }
+
+    public List<Film> getAllFilmsByQueryDirectorAndTitle(String query) {
+        List<Film> filmsByTitle = getAllFilmsByQueryTitle(query);
+        List<Film> filmsByDirector = getAllFilmsByQueryDirector(query);
+        List<Film> allFilms = new ArrayList<>();
+        allFilms.addAll(filmsByTitle);
+        allFilms.addAll(filmsByDirector);
+        return allFilms;
+    }
+
 }

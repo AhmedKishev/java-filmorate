@@ -43,6 +43,12 @@ public class FilmController {
         return film;
     }
 
+    @GetMapping("/search")
+    public List<Film> getAllFilmsByQuery(@RequestParam String query,
+                                         @RequestParam String by) {
+        return filmService.getAllFilmsByQuery(query, by);
+    }
+
     @DeleteMapping(PATH_ID_FILM_TO_USER_ID)
     public void deleteLike(@PathVariable("id") int id,
                            @PathVariable("user-id") int userId) {
