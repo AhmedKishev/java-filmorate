@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -167,5 +168,22 @@ public class FilmDbStorage extends BaseRepository<Film> {
         List<Object> params = new ArrayList<>(similarUsers);
         params.add(id);
         return jdbc.query(filmsSql, (rs, rowNum) -> makeFilm(rs), params.toArray());
+    }
+
+    public List<Film> getCommon(long userId, long friendId) {
+        String getFilmsUser = "SELECT DISTINCT f.* ,m.name AS mpa_name" +
+                " FROM likes AS l" +
+                " INNER JOIN films AS f ON l.film_id=f.film_id" +
+                " LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id" +
+                " WHERE l.user_id=?";
+        ;
+        List<Film> userFilms = jdbc.query(getFilmsUser, (rs, rowNum) -> makeFilm(rs), userId);
+        List<Film> friendFilms = jdbc.query(getFilmsUser, (rs, rowNum) -> makeFilm(rs), friendId);
+        Set<Integer> list2Ids = friendFilms.stream()
+                .map(Film::getId)
+                .collect(Collectors.toSet());
+        return userFilms.stream()
+                .filter(film -> list2Ids.contains(film.getId()))
+                .collect(Collectors.toList());
     }
 }

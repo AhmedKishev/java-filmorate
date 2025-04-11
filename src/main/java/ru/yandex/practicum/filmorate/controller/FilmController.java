@@ -31,6 +31,14 @@ public class FilmController {
         filmService.addLike(id, userId);
     }
 
+
+    @GetMapping("/common")
+    public List<Film> getAllFilmsCommonWithFriend(@RequestParam long userId,
+                                                  @RequestParam long friendId) {
+        return filmService.getAllFilmsCommon(userId, friendId);
+    }
+
+
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         filmService.create(film);

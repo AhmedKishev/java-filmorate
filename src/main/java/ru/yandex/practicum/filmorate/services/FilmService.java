@@ -139,4 +139,8 @@ public class FilmService {
         }
         return filmDbStorage.findRecommendationsByUserId(id);
     }
+
+    public List<Film> getAllFilmsCommon(long userId, long friendId) {
+        return filmDbStorage.getCommon(userId, friendId);
+    }
 }
