@@ -182,4 +182,8 @@ public class FilmService {
             default -> throw new ObjectNotFound("Поиска по такому критерию не существует");
         };
     }
+
+    public List<Film> getAllFilmsCommon(long userId, long friendId) {
+        return filmDbStorage.getCommon(userId, friendId);
+    }
 }
