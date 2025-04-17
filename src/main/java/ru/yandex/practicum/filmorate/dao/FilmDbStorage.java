@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilmDbStorage extends BaseRepository<Film> {
 
-    private static final String SELECT_FILMS = "SELECT f.film_id, " +
+    static final String DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
+    static final String SELECT_FILMS = "SELECT f.film_id, " +
             "f.name, " +
             "f.description, " +
             "f.releaseDate, " +
@@ -42,16 +43,15 @@ public class FilmDbStorage extends BaseRepository<Film> {
     public Film create(Film film) {
         String sql = "INSERT INTO films (name, description, releaseDate, duration, rating_id) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(
-                connection -> {
-                    PreparedStatement ps = connection.prepareStatement(sql, new String[]{"film_id"});
-                    ps.setString(1, film.getName());
-                    ps.setString(2, film.getDescription());
-                    ps.setDate(3, Date.valueOf(film.getReleaseDate()));
-                    ps.setInt(4, (int) film.getDuration());
-                    ps.setInt(5, film.getMpa().getId());
-                    return ps;
-                }, keyHolder);
+        jdbc.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"film_id"});
+            ps.setString(1, film.getName());
+            ps.setString(2, film.getDescription());
+            ps.setDate(3, Date.valueOf(film.getReleaseDate()));
+            ps.setInt(4, (int) film.getDuration());
+            ps.setInt(5, film.getMpa().getId());
+            return ps;
+        }, keyHolder);
         film.setId(keyHolder.getKey().intValue());
         if (film.getGenres() != null) {
             updateGenres(film.getGenres(), film.getId());
@@ -78,8 +78,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
     private void updateGenres(Set<Genre> genres, int idFilm) {
         if (!genres.isEmpty()) {
-            final String SET_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) " +
-                    "VALUES(? , ?)";
+            final String SET_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) " + "VALUES(? , ?)";
             for (Genre genre : genres) {
                 jdbc.update(SET_FILM_GENRES, idFilm, genre.getId());
             }
@@ -110,14 +109,12 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
 
     public List<Film> findPopular(int count) {
-        String sql = "LEFT JOIN likes ON f.film_id = likes.film_id " +
-                "GROUP BY f.film_id " +
-                "ORDER BY COUNT(likes.film_id) DESC " +
-                "LIMIT ?";
+        String sql = "LEFT JOIN likes ON f.film_id = likes.film_id " + "GROUP BY f.film_id " + "ORDER BY COUNT(likes.film_id) DESC " + "LIMIT ?";
         return jdbc.query(SELECT_FILMS + sql, (rs, rowNum) -> makeFilm(rs), count);
     }
 
     private List<Genre> getGenres(int id) {
+
         String getGenre = "SELECT g.genre_id," +
                 "g.name " +
                 " FROM film_genres AS fg" +
@@ -175,6 +172,42 @@ public class FilmDbStorage extends BaseRepository<Film> {
         film.setDirectors(directorSet);
         film.setGenres(genreSet);
         return film;
+    }
+
+
+    public List<Film> findPopularByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        log.debug("Параметры метода: count={}, genreId={}, year={}", count, genreId, year);
+
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, ").append("mpa.rating_id, mpa.name AS mpa_name ").append("FROM films AS f ").append("INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ").append("LEFT JOIN likes ON f.film_id = likes.film_id ").append("LEFT JOIN film_genres AS fg ON f.film_id = fg.film_id ");
+
+        List<Object> params = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+
+        if (genreId != null) {
+            conditions.add("fg.genre_id = ?");
+            params.add(genreId);
+        }
+        if (year != null) {
+            conditions.add("EXTRACT(YEAR FROM f.releaseDate) = ?");
+            params.add(year);
+        }
+
+        if (!conditions.isEmpty()) {
+            sqlBuilder.append("WHERE ").append(String.join(" AND ", conditions)).append(" ");
+        }
+
+        sqlBuilder.append("GROUP BY f.film_id, mpa.rating_id, mpa.name ").append("ORDER BY COUNT(likes.user_id) DESC ").append("LIMIT ?");
+
+        params.add(count);
+        log.debug("Итоговый SQL-запрос: {}", sqlBuilder);
+
+        return jdbc.query(sqlBuilder.toString(), (rs, rowNum) -> makeFilm(rs), params.toArray());
+    }
+
+    public void deleteFilm(int id) {
+        jdbc.update(DELETE_FILM, id);
+        log.info("Удалён фильм с ID: {}", id);
     }
 
 
@@ -303,5 +336,6 @@ public class FilmDbStorage extends BaseRepository<Film> {
         allFilms.addAll(filmsByDirector);
         return allFilms;
     }
+
 
 }
