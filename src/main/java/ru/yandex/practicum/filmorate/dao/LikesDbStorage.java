@@ -21,6 +21,7 @@ public class LikesDbStorage extends BaseRepository<Integer> {
             "VALUES (?,?)";
     static final String DELETE_LIKE_FOR_FILM_BY_ID_USER = "DELETE FROM likes WHERE film_id=? AND user_id=?";
     static final String GET_ALL_RECORDS = "SELECT * FROM likes";
+    static final String GET_LIKES = "SELECT COUNT(user_id) FROM likes WHERE film_id = ?";
 
     public LikesDbStorage(JdbcTemplate jdbc, RowMapper<Integer> mapper) {
         super(jdbc, mapper);
@@ -58,6 +59,11 @@ public class LikesDbStorage extends BaseRepository<Integer> {
             return ps;
         }, keyHolder);
 
+    }
+
+    public int getLikes(int filmId) {
+        Integer count = jdbc.queryForObject(GET_LIKES, Integer.class, filmId);
+        return count != null ? count : 0;
     }
 
 }
