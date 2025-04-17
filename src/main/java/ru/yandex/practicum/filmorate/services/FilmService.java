@@ -133,4 +133,15 @@ public class FilmService {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
     }
 
+    public List<Film> findPopularByGenreAndYear(int count, Integer genreId, Integer year) {
+        List<Film> films = filmDbStorage.findPopularByGenreAndYear(count, genreId, year);
+        genreDbStorage.findAllGenresByFilm(films);
+
+        for (Film film : films) {
+            film.setLikes(likesDbStorage.getLikes(film.getId())); // добавляем кол-во лайков
+        }
+
+        return films;
+    }
+
 }
