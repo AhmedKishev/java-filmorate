@@ -17,8 +17,7 @@ import java.util.Optional;
 @Repository
 public class LikesDbStorage extends BaseRepository<Integer> {
     static final String FIND_FILM_LIKE_BY_ID_USER = "SELECT film_id FROM likes WHERE user_id = ?";
-    static final String ADD_LIKE_FOR_FILM = "INSERT INTO likes (film_id,user_id) " +
-            "VALUES (?,?)";
+    static final String ADD_LIKE_FOR_FILM = "INSERT INTO likes (film_id,user_id) " + "VALUES (?,?)";
     static final String DELETE_LIKE_FOR_FILM_BY_ID_USER = "DELETE FROM likes WHERE film_id=? AND user_id=?";
     static final String GET_ALL_RECORDS = "SELECT * FROM likes";
     static final String GET_LIKES = "SELECT COUNT(user_id) FROM likes WHERE film_id = ?";
@@ -28,20 +27,15 @@ public class LikesDbStorage extends BaseRepository<Integer> {
     }
 
     public Optional<Integer> findLikeById(long userId) {
-        return findOne(FIND_FILM_LIKE_BY_ID_USER,
-                userId);
+        return findOne(FIND_FILM_LIKE_BY_ID_USER, userId);
     }
 
     public void addLike(long idFilm, long idUser) {
-        insertForTableLike(ADD_LIKE_FOR_FILM,
-                idFilm,
-                idUser);
+        insertForTableLike(ADD_LIKE_FOR_FILM, idFilm, idUser);
     }
 
     public void deleteLike(long idFilm, long idUser) {
-        jdbc.update(DELETE_LIKE_FOR_FILM_BY_ID_USER,
-                idFilm,
-                idUser);
+        jdbc.update(DELETE_LIKE_FOR_FILM_BY_ID_USER, idFilm, idUser);
     }
 
     public List<Integer> getAllRecords() {
@@ -51,8 +45,7 @@ public class LikesDbStorage extends BaseRepository<Integer> {
     private void insertForTableLike(String query, Object... params) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             for (int idx = 0; idx < params.length; idx++) {
                 ps.setObject(idx + 1, params[idx]);
             }

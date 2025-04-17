@@ -90,8 +90,7 @@ public class FilmService {
     }
 
     public Film findFilmById(int id) {
-        Film film = filmDbStorage.findFilmById(id)
-                .orElseThrow(() -> new ObjectNotFound("Фильм с id=" + id + " не найден."));
+        Film film = filmDbStorage.findFilmById(id).orElseThrow(() -> new ObjectNotFound("Фильм с id=" + id + " не найден."));
 
         if (id == 10) {
             log.info(film.toString());
