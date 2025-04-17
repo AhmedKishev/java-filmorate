@@ -7,9 +7,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
-
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -29,8 +29,9 @@ public class FilmService {
     final LikesDbStorage likesDbStorage;
     final GenreDbStorage genreDbStorage;
     final MpaDbStorage mpaDbStorage;
+    final DirectorsDbStorage directorsDbStorage;
 
-    public Film create(Film film) {
+    public Film createFilm(Film film) {
         if (film.getName().isEmpty()) {
             log.info("Ошибка при добавлении фильма. Название фильма не может быть пустым");
             throw new ValidationException("Название фильма не может быть пустым");
@@ -59,7 +60,20 @@ public class FilmService {
         return filmDbStorage.create(film);
     }
 
-    public Film update(Film film) {
+
+    public Director createDirector(Director director) {
+        if (director.getName() == null) {
+            throw new ValidationException("У режиссера должно быть имя");
+        }
+        return directorsDbStorage.create(director);
+    }
+
+
+    public List<Director> getAllDirectors() {
+        return directorsDbStorage.getAllDirectors();
+    }
+
+    public Film updateFilm(Film film) {
         if (filmDbStorage.findFilmById(film.getId()).isEmpty()) {
             throw new ObjectNotFound("Фильм не найден.");
         }
@@ -91,11 +105,6 @@ public class FilmService {
 
     public Film findFilmById(int id) {
         Film film = filmDbStorage.findFilmById(id).orElseThrow(() -> new ObjectNotFound("Фильм с id=" + id + " не найден."));
-
-        if (id == 10) {
-            log.info(film.toString());
-        }
-
         return film;
     }
 
@@ -135,6 +144,7 @@ public class FilmService {
         return genreDbStorage.findGenreById(id).orElseThrow(() -> new ObjectNotFound("Жанр не найден."));
     }
 
+
     public List<Film> findPopularByGenreAndYear(int count, Integer genreId, Integer year) {
         List<Film> films = filmDbStorage.findPopularByGenreAndYear(count, genreId, year);
         genreDbStorage.findAllGenresByFilm(films);
@@ -151,6 +161,50 @@ public class FilmService {
             throw new ObjectNotFound("Фильм с id=" + filmId + " не найден");
         }
         filmDbStorage.deleteFilm(filmId);
+    }
+
+
+
+    public Director updateDirector(Director director) {
+        return directorsDbStorage.update(director);
+    }
+
+    public void deleteDirector(long id) {
+        directorsDbStorage.deleteDirector(id);
+    }
+
+    public Optional<Director> getDirectorById(long id) {
+        return directorsDbStorage.getDirectorById(id);
+    }
+
+    public List<Film> getAllFilmsByDirector(Long directorId, String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmDbStorage.getAllFilmsByDirectorSortByDate(directorId);
+        } else if (sortBy.equals("likes")) {
+            return filmDbStorage.getAllFilmsByDirectorFromLikes(directorId);
+        } else throw new ValidationException("Такой сортировки не существует");
+    }
+
+    public List<Film> getRecommendationsById(int id) {
+        if (userDbStorage.findById(id).isEmpty()) {
+            throw new ObjectNotFound("Пользователь не найден.");
+        }
+        return filmDbStorage.findRecommendationsByUserId(id);
+
+    }
+
+    public List<Film> getAllFilmsByQuery(String query,
+                                         String by) {
+        return switch (by) {
+            case "director" -> filmDbStorage.getAllFilmsByQueryDirector(query);
+            case "title" -> filmDbStorage.getAllFilmsByQueryTitle(query);
+            case "director,title", "title,director" -> filmDbStorage.getAllFilmsByQueryDirectorAndTitle(query);
+            default -> throw new ObjectNotFound("Поиска по такому критерию не существует");
+        };
+    }
+
+    public List<Film> getAllFilmsCommon(long userId, long friendId) {
+        return filmDbStorage.getCommon(userId, friendId);
     }
 
 }

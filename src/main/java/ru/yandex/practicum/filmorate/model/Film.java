@@ -24,6 +24,7 @@ public class Film {
     int likes;
     @NotNull
     String name;
+    Set<Director> directors;
     Integer id;
     @Size(max = 200)
     String description;

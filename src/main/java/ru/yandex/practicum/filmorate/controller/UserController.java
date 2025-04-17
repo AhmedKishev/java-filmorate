@@ -6,7 +6,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.services.FilmService;
 import ru.yandex.practicum.filmorate.services.UserService;
 
 import java.util.*;
@@ -17,11 +19,13 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
     final UserService userService;
+    final FilmService filmService;
     static final String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, FilmService filmService) {
         this.userService = userService;
+        this.filmService = filmService;
     }
 
 
@@ -62,6 +66,7 @@ public class UserController {
         return userService.getFriends(id);
     }
 
+
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable int id) {
         log.info("Удаление пользователя с ID: {}", id);
@@ -73,5 +78,12 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable("id") int id) {
+        log.info("Trying to get recommendations of user with id {}", id);
+        List<Film> films = filmService.getRecommendationsById(id);
+        log.info("Found {} recommendations", films.size());
+        return films;
+    }
 
 }
