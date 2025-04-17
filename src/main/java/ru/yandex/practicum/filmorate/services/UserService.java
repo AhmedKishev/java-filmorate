@@ -67,7 +67,7 @@ public class UserService {
             log.info("Ошибка при добавлении пользователя. Логин не может содержать пробелы");
             throw new ValidationException("Логин не может содержать пробелы");
         }
-        if (user.getName() == null) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {

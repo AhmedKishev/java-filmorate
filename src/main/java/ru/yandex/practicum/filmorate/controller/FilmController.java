@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
@@ -15,13 +16,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/films")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Slf4j
 public class FilmController {
     final FilmService filmService;
     static final String PATH_ID_FILM_TO_USER_ID = "/{id}/like/{user-id}";
 
     @GetMapping
     public Collection<Film> getAllFilms() {
-        return filmService.findAllFilms();
+        List<Film> f = filmService.findAllFilms();
+        for (Film film : f)
+            log.info(f.toString());
+        return f;
     }
 
 

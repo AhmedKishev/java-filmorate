@@ -58,4 +58,6 @@ public class UserDbStorage extends BaseRepository<User> {
         jdbc.update(DELETE_USER, id);
         log.info("Удалён пользователь с ID: {}", id);
     }
+
+
 }

@@ -62,7 +62,7 @@ public class FilmService {
 
 
     public Director createDirector(Director director) {
-        if (director.getName() == null) {
+        if (director.getName() == null || director.getName().isBlank()) {
             throw new ValidationException("У режиссера должно быть имя");
         }
         return directorsDbStorage.create(director);
@@ -109,10 +109,11 @@ public class FilmService {
     }
 
     public void addLike(int id, int userId) {
-        if (userDbStorage.findById(id).isEmpty() || userDbStorage.findById(userId).isEmpty()) {
+        if (userDbStorage.findById(userId).isEmpty()) {
             throw new ObjectNotFound("Пользователь не найден.");
         }
-        likesDbStorage.addLike(id, userId);
+        if (likesDbStorage.findLikeByIdToFilmId(id, userId).isEmpty())
+            likesDbStorage.addLike(id, userId);
     }
 
     public void removeLike(int id, int userId) {
@@ -164,7 +165,6 @@ public class FilmService {
     }
 
 
-
     public Director updateDirector(Director director) {
         return directorsDbStorage.update(director);
     }
@@ -178,6 +178,9 @@ public class FilmService {
     }
 
     public List<Film> getAllFilmsByDirector(Long directorId, String sortBy) {
+        if (directorsDbStorage.getDirectorById(directorId).isEmpty()) {
+            throw new ObjectNotFound("Такого директора не существует");
+        }
         if (sortBy.equals("year")) {
             return filmDbStorage.getAllFilmsByDirectorSortByDate(directorId);
         } else if (sortBy.equals("likes")) {

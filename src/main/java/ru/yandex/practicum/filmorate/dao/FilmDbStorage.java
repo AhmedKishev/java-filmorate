@@ -55,6 +55,10 @@ public class FilmDbStorage extends BaseRepository<Film> {
         film.setId(keyHolder.getKey().intValue());
         if (film.getGenres() != null) {
             updateGenres(film.getGenres(), film.getId());
+            List<Genre> r = new ArrayList<>(film.getGenres().stream().toList());
+            Collections.reverse(r);
+            Set<Genre> genres = new LinkedHashSet<>(r);
+            film.setGenres(genres);
         }
         if (film.getDirectors() != null) {
             updateDirectors(film.getDirectors(), film.getId());
@@ -70,14 +74,48 @@ public class FilmDbStorage extends BaseRepository<Film> {
         jdbc.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), id);
         if (film.getDirectors() != null) {
-            updateDirectors(film.getDirectors(), film.getId());
+            if (!film.getDirectors().isEmpty()) {
+                updateDirectors(film.getDirectors(), film.getId());
+            } else {
+                film.setDirectors(new HashSet<>());
+                clearDirectors(film.getId());
+            }
+        } else {
+            film.setDirectors(new HashSet<>());
+            clearDirectors(film.getId());
+        }
+        if (film.getGenres() != null) {
+            if (!film.getGenres().isEmpty()) {
+                updateGenres(film.getGenres(), film.getId());
+                List<Genre> r = new ArrayList<>(film.getGenres().stream().toList());
+                Collections.reverse(r);
+                Set<Genre> genres = new LinkedHashSet<>(r);
+                film.setGenres(genres);
+            } else {
+                clearGenres(film.getId());
+                film.setGenres(new HashSet<>());
+            }
+        } else {
+            film.setGenres(new HashSet<>());
+            clearGenres(film.getId());
         }
         return film;
+    }
+
+    private void clearGenres(Integer id) {
+        String DELETE_GENRES_FOR_FILM = "DELETE FROM film_genres WHERE film_id=?";
+        jdbc.update(DELETE_GENRES_FOR_FILM, id);
+    }
+
+    private void clearDirectors(Integer id) {
+        String DELETE_DIRECTORS_FOR_FILM = "DELETE FROM film_directors WHERE film_id=?";
+        jdbc.update(DELETE_DIRECTORS_FOR_FILM, id);
     }
 
 
     private void updateGenres(Set<Genre> genres, int idFilm) {
         if (!genres.isEmpty()) {
+            clearGenres(idFilm);
             final String SET_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) " + "VALUES(? , ?)";
             for (Genre genre : genres) {
                 jdbc.update(SET_FILM_GENRES, idFilm, genre.getId());
@@ -87,6 +125,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
     private void updateDirectors(Set<Director> directors, Integer idFilm) {
         if (!directors.isEmpty()) {
+            clearDirectors(idFilm);
             final String SET_FILM_DIRECTORS = "INSERT INTO film_directors (film_id,director_id) " +
                     "VALUES(?, ?)";
             for (Director director : directors) {
@@ -308,7 +347,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 " JOIN film_directors fd ON f.film_id = fd.film_id " +
                 " JOIN directors d ON fd.director_id = d.director_id " +
                 " LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id" +
-                " WHERE d.name LIKE ?";
+                " WHERE d.name ILIKE ?";
         String searchPattern = "%" + query + "%";
         return jdbc.query(getAllFilmsByDirector, (rs, rowNum) -> makeFilm(rs), searchPattern);
     }
@@ -323,7 +362,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 "m.name AS mpa_name" +
                 " FROM films f" +
                 " LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id" +
-                " WHERE f.name LIKE ?";
+                " WHERE f.name ILIKE ?";
         String searchPattern = "%" + query + "%";
         return jdbc.query(getAllFilmsByTitle, (rs, rowNum) -> makeFilm(rs), searchPattern);
     }
@@ -332,8 +371,8 @@ public class FilmDbStorage extends BaseRepository<Film> {
         List<Film> filmsByTitle = getAllFilmsByQueryTitle(query);
         List<Film> filmsByDirector = getAllFilmsByQueryDirector(query);
         List<Film> allFilms = new ArrayList<>();
-        allFilms.addAll(filmsByTitle);
         allFilms.addAll(filmsByDirector);
+        allFilms.addAll(filmsByTitle);
         return allFilms;
     }
 
