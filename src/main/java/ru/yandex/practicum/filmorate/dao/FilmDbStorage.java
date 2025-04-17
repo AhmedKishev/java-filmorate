@@ -27,6 +27,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
             "mpa.rating_id, mpa.name AS mpa_name " +
             "FROM films AS f " +
             "INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ";
+    static final String DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -165,6 +166,11 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
         return jdbc.query(sqlBuilder.toString(), (rs, rowNum) -> makeFilm(rs), params.toArray());
     }
+    public void deleteFilm(int id) {
+        jdbc.update(DELETE_FILM, id);
+        log.info("Удалён фильм с ID: {}", id);
+    }
+
 
 
 }

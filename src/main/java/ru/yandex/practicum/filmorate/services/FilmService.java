@@ -90,10 +90,13 @@ public class FilmService {
     }
 
     public Film findFilmById(int id) {
-        Film film = filmDbStorage.findFilmById(id).get();
+        Film film = filmDbStorage.findFilmById(id)
+                .orElseThrow(() -> new ObjectNotFound("Фильм с id=" + id + " не найден."));
+
         if (id == 10) {
             log.info(film.toString());
         }
+
         return film;
     }
 
@@ -142,6 +145,13 @@ public class FilmService {
         }
 
         return films;
+    }
+
+    public void deleteFilmById(int filmId) {
+        if (filmDbStorage.findFilmById(filmId).isEmpty()) {
+            throw new ObjectNotFound("Фильм с id=" + filmId + " не найден");
+        }
+        filmDbStorage.deleteFilm(filmId);
     }
 
 }

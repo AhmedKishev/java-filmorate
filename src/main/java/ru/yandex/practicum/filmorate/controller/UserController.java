@@ -65,5 +65,16 @@ public class UserController {
         return userService.getFriends(id);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable int id) {
+        log.info("Удаление пользователя с ID: {}", id);
+        userService.deleteUserById(id);
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable int id) {
+        return userService.getUserById(id);
+    }
+
 
 }
