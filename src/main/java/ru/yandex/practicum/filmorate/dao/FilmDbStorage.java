@@ -129,4 +129,42 @@ public class FilmDbStorage extends BaseRepository<Film> {
         return film;
     }
 
+    public List<Film> findPopularByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        log.debug("Параметры метода: count={}, genreId={}, year={}", count, genreId, year);
+
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, ")
+                .append("mpa.rating_id, mpa.name AS mpa_name ")
+                .append("FROM films AS f ")
+                .append("INNER JOIN mpa_rating AS mpa ON f.rating_id = mpa.rating_id ")
+                .append("LEFT JOIN likes ON f.film_id = likes.film_id ")
+                .append("LEFT JOIN film_genres AS fg ON f.film_id = fg.film_id ");
+
+        List<Object> params = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+
+        if (genreId != null) {
+            conditions.add("fg.genre_id = ?");
+            params.add(genreId);
+        }
+        if (year != null) {
+            conditions.add("EXTRACT(YEAR FROM f.releaseDate) = ?");
+            params.add(year);
+        }
+
+        if (!conditions.isEmpty()) {
+            sqlBuilder.append("WHERE ").append(String.join(" AND ", conditions)).append(" ");
+        }
+
+        sqlBuilder.append("GROUP BY f.film_id, mpa.rating_id, mpa.name ")
+                .append("ORDER BY COUNT(likes.user_id) DESC ")
+                .append("LIMIT ?");
+
+        params.add(count);
+        log.debug("Итоговый SQL-запрос: {}", sqlBuilder);
+
+        return jdbc.query(sqlBuilder.toString(), (rs, rowNum) -> makeFilm(rs), params.toArray());
+    }
+
+
 }
