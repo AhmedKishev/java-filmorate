@@ -31,18 +31,15 @@ public class ReviewDbStorage extends BaseRepository<Review> {
     public Review updateReview(Review review) {
         long id = review.getReviewId();
         String sql =
-                "UPDATE FILM_REVIEWS SET CONTENT = ?, IS_POSITIVE = ?, FILM_ID = ?, USER_ID = ?, USEFUL = ? " +
+                "UPDATE FILM_REVIEWS SET CONTENT = ?, IS_POSITIVE = ?" +
                 "WHERE ID = ?";
         if (jdbc.update(sql,
                 review.getContent(),
                 review.isPositive(),
-                review.getFilmId(),
-                review.getUserId(),
-                review.getUseful(),
                 id) < 1) {
             throw new ObjectNotFound("Отзыв с id " + review.getReviewId() + " не найден.");
         }
-        return review;
+        return findById(id).get();
     }
 
     public void deleteReview(int id) {
@@ -51,16 +48,20 @@ public class ReviewDbStorage extends BaseRepository<Review> {
     }
 
     public List<Review> findReviewsByFilm(int filmId, int count) {
-        String sql = SELECT_REVIEWS;
         if (filmId != -1) {
-            sql += "WHERE film_id = ? ";
+            String sql =
+                    "SELECT * FROM film_reviews " +
+                    "WHERE FILM_ID = ? " +
+                    "ORDER BY USEFUL DESC LIMIT ?";
+            return jdbc.query(sql, mapper, filmId, count);
         }
-        sql += "LIMIT ?";
+        String sql = "SELECT * FROM film_reviews ORDER BY USEFUL DESC LIMIT ?";
+        return jdbc.query(sql, mapper, count);
 
-        return jdbc.query(sql, mapper, filmId, count);
+
     }
 
-    public Optional<Review> findById(int id) {
+    public Optional<Review> findById(long id) {
         String sql = SELECT_REVIEWS + "WHERE id = ?";
         return findOne(sql, id);
     }
