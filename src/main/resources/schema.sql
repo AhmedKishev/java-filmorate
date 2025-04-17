@@ -55,7 +55,6 @@ CREATE TABLE IF NOT EXISTS genres(
     name     VARCHAR(255)
 );
 
-
 CREATE TABLE IF NOT EXISTS film_genres (
     id INT AUTO_INCREMENT,
     film_id INT,
