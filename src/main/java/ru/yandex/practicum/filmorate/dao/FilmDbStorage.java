@@ -324,7 +324,6 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 " INNER JOIN films AS f ON l.film_id=f.film_id" +
                 " LEFT JOIN mpa_rating m ON f.rating_id = m.rating_id" +
                 " WHERE l.user_id=?";
-        ;
         List<Film> userFilms = jdbc.query(getFilmsUser, (rs, rowNum) -> makeFilm(rs), userId);
         List<Film> friendFilms = jdbc.query(getFilmsUser, (rs, rowNum) -> makeFilm(rs), friendId);
         Set<Integer> list2Ids = friendFilms.stream()

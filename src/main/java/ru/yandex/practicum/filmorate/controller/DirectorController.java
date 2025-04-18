@@ -17,8 +17,8 @@ import java.util.Optional;
 @RequestMapping("/directors")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DirectorController {
-    final FilmService filmService;
     static final String PATH_TO_DIRECTOR_ID = "/{director-id}";
+    final FilmService filmService;
 
     @PostMapping
     public Director createDirector(@Valid @RequestBody Director director) {
