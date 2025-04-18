@@ -21,8 +21,7 @@ public class ReviewService {
     private final FeedService feedService;
 
     public Review getReviewById(int id) {
-        return reviewStorage.findById(id)
-                .orElseThrow(() -> new ObjectNotFound("Отзыв с id " + id + " не найден."));
+        return reviewStorage.findById(id).orElseThrow(() -> new ObjectNotFound("Отзыв с id " + id + " не найден."));
     }
 
     public Review updateReview(Review review) {
