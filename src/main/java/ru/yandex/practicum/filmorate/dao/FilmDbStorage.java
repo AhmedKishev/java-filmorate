@@ -99,12 +99,12 @@ public class FilmDbStorage extends BaseRepository<Film> {
     }
 
     private void clearGenres(Integer id) {
-        String deleteGenresForFilm="DELETE FROM film_genres WHERE film_id=?";
+        String deleteGenresForFilm = "DELETE FROM film_genres WHERE film_id=?";
         jdbc.update(deleteGenresForFilm, id);
     }
 
     private void clearDirectors(Integer id) {
-        String deleteDirectorsForFilm="DELETE FROM film_directors WHERE film_id=?";
+        String deleteDirectorsForFilm = "DELETE FROM film_directors WHERE film_id=?";
         jdbc.update(deleteDirectorsForFilm, id);
     }
 
