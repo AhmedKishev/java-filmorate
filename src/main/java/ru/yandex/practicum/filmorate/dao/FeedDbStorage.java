@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.dao.mappers.FeedRowMapper;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 
 import java.util.List;
+import java.util.Collections;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,7 +29,10 @@ public class FeedDbStorage {
                 event.getTimestamp());
     }
 
+
     public List<FeedEvent> getUserFeed(Long userId) {
-        return jdbcTemplate.query(GET_USER_FEED, feedRowMapper, userId);
+        List<FeedEvent> list = jdbcTemplate.query(GET_USER_FEED, feedRowMapper, userId);
+        Collections.reverse(list);
+        return list;
     }
 }
