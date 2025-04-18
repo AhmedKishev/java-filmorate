@@ -18,17 +18,18 @@ import java.util.stream.Collectors;
 
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 @RequiredArgsConstructor
 @Slf4j
 public class FilmService {
-    final FilmDbStorage filmDbStorage;
-    final UserDbStorage userDbStorage;
-    final LikesDbStorage likesDbStorage;
-    final GenreDbStorage genreDbStorage;
-    final MpaDbStorage mpaDbStorage;
-    final DirectorsDbStorage directorsDbStorage;
-    final FeedService feedService;
+    FilmDbStorage filmDbStorage;
+    UserDbStorage userDbStorage;
+    LikesDbStorage likesDbStorage;
+    GenreDbStorage genreDbStorage;
+    MpaDbStorage mpaDbStorage;
+    DirectorsDbStorage directorsDbStorage;
+    FeedService feedService;
 
     public Film createFilm(Film film) {
         if (film.getName().isEmpty()) {

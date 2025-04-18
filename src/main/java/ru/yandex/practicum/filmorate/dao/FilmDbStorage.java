@@ -22,11 +22,12 @@ import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class FilmDbStorage extends BaseRepository<Film> {
 
-    static final String DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
-    static final String SELECT_FILMS = "SELECT f.film_id, " +
+    static String DELETE_FILM = "DELETE FROM films WHERE film_id = ?";
+    static String SELECT_FILMS = "SELECT f.film_id, " +
             "f.name, " +
             "f.description, " +
             "f.releaseDate, " +

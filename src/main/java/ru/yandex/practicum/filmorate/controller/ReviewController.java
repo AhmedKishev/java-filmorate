@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,8 +20,10 @@ import java.util.List;
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class ReviewController {
-    private final ReviewService reviewService;
+    ReviewService reviewService;
 
     @PostMapping()
     public ResponseEntity<ReviewGetDto> createReview(@Valid @RequestBody ReviewCreateDto reviewCreateDto) {

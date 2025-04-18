@@ -19,12 +19,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 @RequiredArgsConstructor
 public class UserService {
-    final UserDbStorage userDbStorage;
-    final FriendshipDbStorage friendshipDbStorage;
-    final FeedService feedService;
+    UserDbStorage userDbStorage;
+    FriendshipDbStorage friendshipDbStorage;
+    FeedService feedService;
 
     public List<User> addFriend(int id, int friendId) {
         getUserById(id);

@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
@@ -13,8 +15,10 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
+@FieldDefaults(level = AccessLevel.PACKAGE,
+        makeFinal = true)
 public class MpaDbStorage {
-    private final JdbcTemplate jdbcTemplate;
+    JdbcTemplate jdbcTemplate;
 
 
     public List<MPA> findAllMpa() {

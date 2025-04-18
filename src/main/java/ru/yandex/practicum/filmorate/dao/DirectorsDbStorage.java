@@ -15,15 +15,16 @@ import java.util.Optional;
 
 @Repository
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class DirectorsDbStorage extends BaseRepository<Director> {
 
-    static final String INSERT_DIRECTOR = "INSERT INTO directors(name) " +
+    static String INSERT_DIRECTOR = "INSERT INTO directors(name) " +
             "VALUES(?)";
-    static final String GET_ALL_DIRECTORS = "SELECT * FROM directors";
-    static final String FIND_BY_ID_DIRECTOR = "SELECT* FROM directors WHERE director_id=?";
-    static final String UPDATE_QUERY = "UPDATE directors SET name=? WHERE director_id=?";
-    static final String DELETE_QUERY = "DELETE directors WHERE director_id=?";
+    static String GET_ALL_DIRECTORS = "SELECT * FROM directors";
+    static String FIND_BY_ID_DIRECTOR = "SELECT* FROM directors WHERE director_id=?";
+    static String UPDATE_QUERY = "UPDATE directors SET name=? WHERE director_id=?";
+    static String DELETE_QUERY = "DELETE directors WHERE director_id=?";
 
     public DirectorsDbStorage(JdbcTemplate jdbc, RowMapper<Director> mapper) {
         super(jdbc, mapper);

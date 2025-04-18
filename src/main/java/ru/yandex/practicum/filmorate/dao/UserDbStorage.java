@@ -15,14 +15,15 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class UserDbStorage extends BaseRepository<User> {
 
-    static final String INSERT_USER = "INSERT INTO users (email, login, name,birthday)" + " VALUES(?, ?, ?, ?)";
-    static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id=?";
-    static final String UPDATE_QUERY = "UPDATE users SET email=?, login=?,name=?,birthday=? WHERE user_id=?";
-    static final String FIND_ALL_USERS = "SELECT * FROM users";
-    static final String DELETE_USER = "DELETE FROM users WHERE user_id = ?";
+    static String INSERT_USER = "INSERT INTO users (email, login, name,birthday)" + " VALUES(?, ?, ?, ?)";
+    static String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE user_id=?";
+    static String UPDATE_QUERY = "UPDATE users SET email=?, login=?,name=?,birthday=? WHERE user_id=?";
+    static String FIND_ALL_USERS = "SELECT * FROM users";
+    static String DELETE_USER = "DELETE FROM users WHERE user_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper);

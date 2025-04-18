@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ReviewGetDto {
-    @NotNull
+
     long reviewId;
 
     @NotNull

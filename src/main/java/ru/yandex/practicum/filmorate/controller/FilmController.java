@@ -15,11 +15,12 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/films")
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 @Slf4j
 public class FilmController {
     static final String PATH_ID_FILM_TO_USER_ID = "/{id}/like/{user-id}";
-    final FilmService filmService;
+    FilmService filmService;
 
     @GetMapping
     public Collection<Film> getAllFilms() {

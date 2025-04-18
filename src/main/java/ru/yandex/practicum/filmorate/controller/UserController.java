@@ -17,11 +17,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class UserController {
     static final String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
-    final UserService userService;
-    final FilmService filmService;
+    UserService userService;
+    FilmService filmService;
 
     @Autowired
     public UserController(UserService userService, FilmService filmService) {

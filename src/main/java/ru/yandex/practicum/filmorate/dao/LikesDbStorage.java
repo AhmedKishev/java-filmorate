@@ -12,14 +12,15 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 @Repository
 public class LikesDbStorage extends BaseRepository<Integer> {
-    static final String FIND_FILM_LIKE_BY_ID_USER = "SELECT film_id FROM likes WHERE user_id = ?";
-    static final String ADD_LIKE_FOR_FILM = "INSERT INTO likes (film_id,user_id) " + "VALUES (?,?)";
-    static final String DELETE_LIKE_FOR_FILM_BY_ID_USER = "DELETE FROM likes WHERE film_id=? AND user_id=?";
-    static final String GET_ALL_RECORDS = "SELECT * FROM likes";
-    static final String GET_LIKES = "SELECT COUNT(user_id) FROM likes WHERE film_id = ?";
+    static String FIND_FILM_LIKE_BY_ID_USER = "SELECT film_id FROM likes WHERE user_id = ?";
+    static String ADD_LIKE_FOR_FILM = "INSERT INTO likes (film_id,user_id) " + "VALUES (?,?)";
+    static String DELETE_LIKE_FOR_FILM_BY_ID_USER = "DELETE FROM likes WHERE film_id=? AND user_id=?";
+    static String GET_ALL_RECORDS = "SELECT * FROM likes";
+    static String GET_LIKES = "SELECT COUNT(user_id) FROM likes WHERE film_id = ?";
 
     public LikesDbStorage(JdbcTemplate jdbc, RowMapper<Integer> mapper) {
         super(jdbc, mapper);

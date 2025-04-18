@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.services;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.ReviewDbStorage;
@@ -14,11 +16,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class ReviewService {
-    private final ReviewDbStorage reviewStorage;
-    private final FilmDbStorage filmDbStorage;
-    private final UserDbStorage userDbStorage;
-    private final FeedService feedService;
+    ReviewDbStorage reviewStorage;
+    FilmDbStorage filmDbStorage;
+    UserDbStorage userDbStorage;
+    FeedService feedService;
 
     public Review getReviewById(int id) {
         return reviewStorage.findById(id).orElseThrow(() -> new ObjectNotFound("Отзыв с id " + id + " не найден."));

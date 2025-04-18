@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.mappers.FeedRowMapper;
@@ -11,13 +13,15 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class FeedDbStorage {
-    private static final String ADD_EVENT =
+    static String ADD_EVENT =
             "INSERT INTO feed (user_id, event_type, operation, entity_id, timestamp) VALUES (?, ?, ?, ?, ?)";
-    private static final String GET_USER_FEED =
+    static String GET_USER_FEED =
             "SELECT * FROM feed WHERE user_id = ? ORDER BY timestamp DESC";
-    private final JdbcTemplate jdbcTemplate;
-    private final FeedRowMapper feedRowMapper;
+    JdbcTemplate jdbcTemplate;
+    FeedRowMapper feedRowMapper;
 
     public void addEvent(FeedEvent event) {
         jdbcTemplate.update(ADD_EVENT,

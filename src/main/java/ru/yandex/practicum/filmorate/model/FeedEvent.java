@@ -1,21 +1,20 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FeedEvent {
-    private Long eventId;
-    private Long timestamp;
-    private Long userId;
-    private EventType eventType;
-    private Operation operation;
-    private Long entityId;
+    Long eventId;
+    Long timestamp;
+    Long userId;
+    EventType eventType;
+    Operation operation;
+    Long entityId;
 
     public enum EventType {
         LIKE, REVIEW, FRIEND

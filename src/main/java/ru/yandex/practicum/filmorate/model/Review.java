@@ -25,6 +25,6 @@ public class Review {
     @NotNull
     boolean isPositive;
 
-    @NotNull
+
     int useful;
 }

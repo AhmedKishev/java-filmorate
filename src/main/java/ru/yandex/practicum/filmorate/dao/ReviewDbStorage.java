@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,9 +14,11 @@ import java.util.Optional;
 
 @Repository
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class ReviewDbStorage extends BaseRepository<Review> {
 
-    private static final String SELECT_REVIEWS = "SELECT * FROM film_reviews ";
+    static String SELECT_REVIEWS = "SELECT * FROM film_reviews ";
 
     public ReviewDbStorage(JdbcTemplate jdbc, RowMapper<Review> mapper) {
         super(jdbc, mapper);

@@ -15,10 +15,11 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/directors")
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class DirectorController {
     static final String PATH_TO_DIRECTOR_ID = "/{director-id}";
-    final FilmService filmService;
+    FilmService filmService;
 
     @PostMapping
     public Director createDirector(@Valid @RequestBody Director director) {
