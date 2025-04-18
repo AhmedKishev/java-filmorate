@@ -8,19 +8,19 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
-
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
 @Repository
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class FriendshipDbStorage extends BaseRepository<Long> {
-    static final String ADD_FRIEND = "INSERT INTO friendship (user_id, friend_id) " +
+    static String ADD_FRIEND = "INSERT INTO friendship (user_id, friend_id) " +
             "VALUES (?, ?)";
-    static final String GET_ALL_FRIEND_BY_USER = "SELECT * FROM friendship WHERE user_id = ?";
-    static final String DELETE_FRIEND_BY_ID = "DELETE FROM friendship WHERE user_id=? AND friend_id=?";
+    static String GET_ALL_FRIEND_BY_USER = "SELECT * FROM friendship WHERE user_id = ?";
+    static String DELETE_FRIEND_BY_ID = "DELETE FROM friendship WHERE user_id=? AND friend_id=?";
 
     public FriendshipDbStorage(JdbcTemplate jdbc, RowMapper<Long> mapper) {
         super(jdbc, mapper);

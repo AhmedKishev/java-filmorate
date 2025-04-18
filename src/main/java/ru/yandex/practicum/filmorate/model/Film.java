@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -24,6 +23,7 @@ public class Film {
     int likes;
     @NotNull
     String name;
+    Set<Director> directors;
     Integer id;
     @Size(max = 200)
     String description;

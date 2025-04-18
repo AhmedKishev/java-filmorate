@@ -1,23 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
-
-
 @Data
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
-    Long id;
-    @Email
+public class Review {
+    Long reviewId;
+
+    @NotBlank
+    String content;
+
     @NotNull
-    String email;
+    Integer filmId;
+
     @NotNull
-    String login;
-    String name;
-    LocalDate birthday;
+    Integer userId;
+
+
+    boolean isPositive;
+
+
+    int useful;
 }

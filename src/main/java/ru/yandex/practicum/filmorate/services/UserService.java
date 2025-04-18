@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dao.FriendshipDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -18,43 +19,29 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 @RequiredArgsConstructor
 public class UserService {
-    final UserDbStorage userDbStorage;
-    final FriendshipDbStorage friendshipDbStorage;
+    UserDbStorage userDbStorage;
+    FriendshipDbStorage friendshipDbStorage;
+    FeedService feedService;
 
     public List<User> addFriend(int id, int friendId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        Optional<User> friend = getAllUsers().stream()
-                .filter(user -> user.getId() == friendId)
-                .findFirst();
-        if (person.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + id + " не существует");
-        }
-        if (friend.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
-        }
+        getUserById(id);
+        getUserById(friendId);
+
         friendshipDbStorage.addFriend(id, friendId);
+        feedService.addEvent(id, FeedEvent.EventType.FRIEND, FeedEvent.Operation.ADD, friendId);
         return getFriends(id);
     }
 
     public void deleteFriend(int id, int friendId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        Optional<User> friend = getAllUsers().stream()
-                .filter(user -> user.getId() == friendId)
-                .findFirst();
-        if (person.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + id + " не существует");
-        }
-        if (friend.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
-        }
+        getUserById(id);
+        getUserById(friendId);
+
         friendshipDbStorage.deleteFriend(id, friendId);
+        feedService.addEvent(id, FeedEvent.EventType.FRIEND, FeedEvent.Operation.REMOVE, friendId);
     }
 
 
@@ -75,7 +62,7 @@ public class UserService {
             log.info("Ошибка при добавлении пользователя. Логин не может содержать пробелы");
             throw new ValidationException("Логин не может содержать пробелы");
         }
-        if (user.getName() == null) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
@@ -112,18 +99,13 @@ public class UserService {
         return userDbStorage.getAllUsers();
     }
 
-    private List<User> getFriends(List<Long> friendsId,
-                                  List<User> allUsers) {
-        return allUsers.stream()
-                .filter(user -> friendsId.contains(user.getId()))
-                .collect(Collectors.toList());
+    private List<User> getFriends(List<Long> friendsId, List<User> allUsers) {
+        return allUsers.stream().filter(user -> friendsId.contains(user.getId())).collect(Collectors.toList());
     }
 
 
     public List<User> getFriends(long userId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == userId)
-                .findFirst();
+        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == userId).findFirst();
         if (person.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + userId + " не существует");
         }
@@ -133,12 +115,8 @@ public class UserService {
     }
 
     public List<User> getListFriendsWithOtherUser(int id, int otherId) {
-        Optional<User> person = getAllUsers().stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-        Optional<User> other = getAllUsers().stream()
-                .filter(user -> user.getId() == otherId)
-                .findFirst();
+        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == id).findFirst();
+        Optional<User> other = getAllUsers().stream().filter(user -> user.getId() == otherId).findFirst();
         if (person.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + id + " не существует");
         }
@@ -149,13 +127,20 @@ public class UserService {
         List<Long> friendsForFirstUser = friendshipDbStorage.getAllFriends(id);
         List<Long> friendsForSecondUser = friendshipDbStorage.getAllFriends(otherId);
 
-        List<Long> intersection = friendsForSecondUser.stream()
-                .filter(friendsForFirstUser::contains)
-                .toList();
+        List<Long> intersection = friendsForSecondUser.stream().filter(friendsForFirstUser::contains).toList();
 
-        return getAllUsers().stream()
-                .filter(user -> intersection.contains(user.getId()))
-                .collect(Collectors.toList());
+        return getAllUsers().stream().filter(user -> intersection.contains(user.getId())).collect(Collectors.toList());
+    }
+
+    public void deleteUserById(int userId) {
+        if (userDbStorage.findById(userId).isEmpty()) {
+            throw new ObjectNotFound("Пользователь с id=" + userId + " не найден");
+        }
+        userDbStorage.deleteUser(userId);
+    }
+
+    public User getUserById(int id) {
+        return userDbStorage.findById(id).orElseThrow(() -> new ObjectNotFound("Пользователь с id=" + id + " не найден"));
     }
 
 }

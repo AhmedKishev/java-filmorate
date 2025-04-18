@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -18,8 +20,10 @@ import static java.util.function.UnaryOperator.identity;
 
 @RequiredArgsConstructor
 @Repository
+@FieldDefaults(level = AccessLevel.PRIVATE,
+        makeFinal = true)
 public class GenreDbStorage {
-    private final JdbcTemplate jdbcTemplate;
+    JdbcTemplate jdbcTemplate;
 
 
     public List<Genre> findAllGenres() {
