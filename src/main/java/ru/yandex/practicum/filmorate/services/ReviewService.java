@@ -51,17 +51,11 @@ public class ReviewService {
     public void likeReview(int reviewId, int userId, boolean isPositive) {
         validateLike(reviewId, userId);
         reviewStorage.addLike(reviewId, userId, isPositive);
-        if (!isPositive) {
-            feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, reviewId);
-        }
     }
 
     public void removeLike(int reviewId, int userId, boolean isPositive) {
         validateLike(reviewId, userId);
         reviewStorage.removeLike(reviewId, userId, isPositive);
-        if (isPositive) {
-            feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.REMOVE, reviewId);
-        }
     }
 
     private void validateLike(int reviewId, int userId) {
