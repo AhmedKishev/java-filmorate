@@ -22,7 +22,7 @@ public class Review {
     @NotNull
     Integer userId;
 
-    @NotNull
+
     boolean isPositive;
 
 
