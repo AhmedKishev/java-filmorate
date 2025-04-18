@@ -13,13 +13,7 @@ public class FeedService {
     private final FeedDbStorage feedDbStorage;
 
     public void addEvent(long userId, FeedEvent.EventType type, FeedEvent.Operation operation, long entityId) {
-        FeedEvent event = FeedEvent.builder()
-                .timestamp(System.currentTimeMillis())
-                .userId(userId)
-                .eventType(type)
-                .operation(operation)
-                .entityId(entityId)
-                .build();
+        FeedEvent event = FeedEvent.builder().timestamp(System.currentTimeMillis()).userId(userId).eventType(type).operation(operation).entityId(entityId).build();
         feedDbStorage.addEvent(event);
     }
 
