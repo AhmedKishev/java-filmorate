@@ -55,10 +55,6 @@ public class FilmDbStorage extends BaseRepository<Film> {
         film.setId(keyHolder.getKey().intValue());
         if (film.getGenres() != null) {
             updateGenres(film.getGenres(), film.getId());
-            List<Genre> r = new ArrayList<>(film.getGenres().stream().toList());
-            Collections.reverse(r);
-            Set<Genre> genres = new LinkedHashSet<>(r);
-            film.setGenres(genres);
         }
         if (film.getDirectors() != null) {
             updateDirectors(film.getDirectors(), film.getId());
