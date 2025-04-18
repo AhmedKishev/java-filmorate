@@ -6,10 +6,11 @@ import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -17,27 +18,30 @@ public class ReviewService {
     private final ReviewDbStorage reviewStorage;
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
+    private final FeedService feedService;
 
     public Review getReviewById(int id) {
-        Optional<Review> reviewOptional = reviewStorage.findById(id);
-        if (reviewOptional.isEmpty()) {
-            throw new ObjectNotFound("Отзыв с id " + id + " не найден.");
-        }
-        return reviewOptional.get();
+        return reviewStorage.findById(id).orElseThrow(() -> new ObjectNotFound("Отзыв с id " + id + " не найден."));
     }
 
     public Review updateReview(Review review) {
         validateReview(review.getFilmId(), review.getUserId());
-        return reviewStorage.updateReview(review);
+        Review updated = reviewStorage.updateReview(review);
+        feedService.addEvent(review.getUserId(), FeedEvent.EventType.REVIEW, FeedEvent.Operation.UPDATE, review.getReviewId());
+        return updated;
     }
 
     public Review createReview(Review review) {
         validateReview(review.getFilmId(), review.getUserId());
-        return reviewStorage.createReview(review);
+        Review created = reviewStorage.createReview(review);
+        feedService.addEvent(review.getUserId(), FeedEvent.EventType.REVIEW, FeedEvent.Operation.ADD, created.getReviewId());
+        return created;
     }
 
     public void deleteReview(int id) {
+        Review review = getReviewById(id); // получаем, чтобы узнать userId
         reviewStorage.deleteReview(id);
+        feedService.addEvent(review.getUserId(), FeedEvent.EventType.REVIEW, FeedEvent.Operation.REMOVE, id);
     }
 
     public List<Review> getReviewByFilmId(int filmId, int count) {

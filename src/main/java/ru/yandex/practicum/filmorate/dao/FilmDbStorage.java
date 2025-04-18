@@ -55,10 +55,6 @@ public class FilmDbStorage extends BaseRepository<Film> {
         film.setId(keyHolder.getKey().intValue());
         if (film.getGenres() != null) {
             updateGenres(film.getGenres(), film.getId());
-            List<Genre> r = new ArrayList<>(film.getGenres().stream().toList());
-            Collections.reverse(r);
-            Set<Genre> genres = new LinkedHashSet<>(r);
-            film.setGenres(genres);
         }
         if (film.getDirectors() != null) {
             updateDirectors(film.getDirectors(), film.getId());
@@ -103,22 +99,22 @@ public class FilmDbStorage extends BaseRepository<Film> {
     }
 
     private void clearGenres(Integer id) {
-        String DELETE_GENRES_FOR_FILM = "DELETE FROM film_genres WHERE film_id=?";
-        jdbc.update(DELETE_GENRES_FOR_FILM, id);
+        String deleteGenresForFilm = "DELETE FROM film_genres WHERE film_id=?";
+        jdbc.update(deleteGenresForFilm, id);
     }
 
     private void clearDirectors(Integer id) {
-        String DELETE_DIRECTORS_FOR_FILM = "DELETE FROM film_directors WHERE film_id=?";
-        jdbc.update(DELETE_DIRECTORS_FOR_FILM, id);
+        String deleteDirectorsForFilm = "DELETE FROM film_directors WHERE film_id=?";
+        jdbc.update(deleteDirectorsForFilm, id);
     }
 
 
     private void updateGenres(Set<Genre> genres, int idFilm) {
         if (!genres.isEmpty()) {
             clearGenres(idFilm);
-            final String SET_FILM_GENRES = "INSERT INTO film_genres (film_id, genre_id) " + "VALUES(? , ?)";
+            final String setFilmGenres = "INSERT INTO film_genres (film_id, genre_id) " + "VALUES(? , ?)";
             for (Genre genre : genres) {
-                jdbc.update(SET_FILM_GENRES, idFilm, genre.getId());
+                jdbc.update(setFilmGenres, idFilm, genre.getId());
             }
         }
     }
@@ -126,10 +122,10 @@ public class FilmDbStorage extends BaseRepository<Film> {
     private void updateDirectors(Set<Director> directors, Integer idFilm) {
         if (!directors.isEmpty()) {
             clearDirectors(idFilm);
-            final String SET_FILM_DIRECTORS = "INSERT INTO film_directors (film_id,director_id) " +
+            final String setFilmDirectors = "INSERT INTO film_directors (film_id,director_id) " +
                     "VALUES(?, ?)";
             for (Director director : directors) {
-                jdbc.update(SET_FILM_DIRECTORS, idFilm, director.getId());
+                jdbc.update(setFilmDirectors, idFilm, director.getId());
             }
         }
     }
