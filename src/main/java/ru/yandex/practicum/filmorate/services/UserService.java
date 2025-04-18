@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dao.FriendshipDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class UserService {
     final UserDbStorage userDbStorage;
     final FriendshipDbStorage friendshipDbStorage;
+    final FeedService feedService;
 
     public List<User> addFriend(int id, int friendId) {
         Optional<User> person = getAllUsers().stream()
@@ -38,7 +40,9 @@ public class UserService {
             throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
         }
         friendshipDbStorage.addFriend(id, friendId);
+        feedService.addEvent(id, FeedEvent.EventType.FRIEND, FeedEvent.Operation.ADD, friendId);
         return getFriends(id);
+
     }
 
     public void deleteFriend(int id, int friendId) {
@@ -54,6 +58,7 @@ public class UserService {
         if (friend.isEmpty()) {
             throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
         }
+        feedService.addEvent(id, FeedEvent.EventType.FRIEND, FeedEvent.Operation.REMOVE, friendId);
         friendshipDbStorage.deleteFriend(id, friendId);
     }
 

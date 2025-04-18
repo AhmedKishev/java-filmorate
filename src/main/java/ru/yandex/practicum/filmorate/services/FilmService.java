@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.dao.*;
 
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -29,6 +30,7 @@ public class FilmService {
     final LikesDbStorage likesDbStorage;
     final GenreDbStorage genreDbStorage;
     final MpaDbStorage mpaDbStorage;
+    final FeedService feedService;
 
     public Film create(Film film) {
         if (film.getName().isEmpty()) {
@@ -102,6 +104,8 @@ public class FilmService {
             throw new ObjectNotFound("Пользователь не найден.");
         }
         likesDbStorage.addLike(id, userId);
+        feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, id);
+
     }
 
     public void removeLike(int id, int userId) {
@@ -109,6 +113,8 @@ public class FilmService {
             throw new ObjectNotFound("Пользователь не найден.");
         }
         likesDbStorage.deleteLike(id, userId);
+        feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.REMOVE, id);
+
     }
 
     public List<Film> findPopular(int count) {
