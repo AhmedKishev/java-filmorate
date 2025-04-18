@@ -27,28 +27,18 @@ public class UserService {
     final FeedService feedService;
 
     public List<User> addFriend(int id, int friendId) {
-        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == id).findFirst();
-        Optional<User> friend = getAllUsers().stream().filter(user -> user.getId() == friendId).findFirst();
-        if (person.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + id + " не существует");
-        }
-        if (friend.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
-        }
+        getUserById(id);
+        getUserById(friendId);
+
         friendshipDbStorage.addFriend(id, friendId);
         feedService.addEvent(id, FeedEvent.EventType.FRIEND, FeedEvent.Operation.ADD, friendId);
         return getFriends(id);
     }
 
     public void deleteFriend(int id, int friendId) {
-        Optional<User> person = getAllUsers().stream().filter(user -> user.getId() == id).findFirst();
-        Optional<User> friend = getAllUsers().stream().filter(user -> user.getId() == friendId).findFirst();
-        if (person.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + id + " не существует");
-        }
-        if (friend.isEmpty()) {
-            throw new ObjectNotFound("Пользователя с id " + friendId + " не существует");
-        }
+        getUserById(id);
+        getUserById(friendId);
+
         friendshipDbStorage.deleteFriend(id, friendId);
         feedService.addEvent(id, FeedEvent.EventType.FRIEND, FeedEvent.Operation.REMOVE, friendId);
     }
