@@ -110,8 +110,7 @@ public class FilmService {
         if (userDbStorage.findById(userId).isEmpty()) {
             throw new ObjectNotFound("Пользователь не найден.");
         }
-        if (likesDbStorage.findLikeByIdToFilmId(id, userId).isEmpty())
-            likesDbStorage.addLike(id, userId);
+        if (likesDbStorage.findLikeByIdToFilmId(id, userId).isEmpty()) likesDbStorage.addLike(id, userId);
         feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, id);
 
     }
@@ -197,8 +196,7 @@ public class FilmService {
 
     }
 
-    public List<Film> getAllFilmsByQuery(String query,
-                                         String by) {
+    public List<Film> getAllFilmsByQuery(String query, String by) {
         return switch (by) {
             case "director" -> filmDbStorage.getAllFilmsByQueryDirector(query);
             case "title" -> filmDbStorage.getAllFilmsByQueryTitle(query);
