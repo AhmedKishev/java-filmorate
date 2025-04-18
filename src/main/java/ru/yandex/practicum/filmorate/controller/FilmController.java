@@ -31,8 +31,7 @@ public class FilmController {
 
 
     @GetMapping("/director/{director-id}")
-    public List<Film> getAllFilmsByDirectorWithSort(@PathVariable("director-id") Long directorId,
-                                                    @RequestParam String sortBy) {
+    public List<Film> getAllFilmsByDirectorWithSort(@PathVariable("director-id") Long directorId, @RequestParam String sortBy) {
         return filmService.getAllFilmsByDirector(directorId, sortBy);
     }
 
@@ -43,8 +42,7 @@ public class FilmController {
 
 
     @GetMapping("/common")
-    public List<Film> getAllFilmsCommonWithFriend(@RequestParam long userId,
-                                                  @RequestParam long friendId) {
+    public List<Film> getAllFilmsCommonWithFriend(@RequestParam long userId, @RequestParam long friendId) {
         return filmService.getAllFilmsCommon(userId, friendId);
     }
 
@@ -56,8 +54,7 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public List<Film> getAllFilmsByQuery(@RequestParam String query,
-                                         @RequestParam String by) {
+    public List<Film> getAllFilmsByQuery(@RequestParam String query, @RequestParam String by) {
         return filmService.getAllFilmsByQuery(query, by);
     }
 
