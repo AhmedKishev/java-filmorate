@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.*;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -30,6 +27,7 @@ public class FilmService {
     final GenreDbStorage genreDbStorage;
     final MpaDbStorage mpaDbStorage;
     final DirectorsDbStorage directorsDbStorage;
+    final FeedService feedService;
 
     public Film createFilm(Film film) {
         if (film.getName().isEmpty()) {
@@ -114,6 +112,8 @@ public class FilmService {
         }
         if (likesDbStorage.findLikeByIdToFilmId(id, userId).isEmpty())
             likesDbStorage.addLike(id, userId);
+        feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, id);
+
     }
 
     public void removeLike(int id, int userId) {
@@ -121,6 +121,7 @@ public class FilmService {
             throw new ObjectNotFound("Пользователь не найден.");
         }
         likesDbStorage.deleteLike(id, userId);
+        feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.REMOVE, id);
     }
 
     public List<Film> findPopular(int count) {
