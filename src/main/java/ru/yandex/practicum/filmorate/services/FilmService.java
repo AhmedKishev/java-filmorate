@@ -112,7 +112,6 @@ public class FilmService {
         }
         if (likesDbStorage.findLikeByIdToFilmId(id, userId).isEmpty()) likesDbStorage.addLike(id, userId);
         feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, id);
-
     }
 
     public void removeLike(int id, int userId) {

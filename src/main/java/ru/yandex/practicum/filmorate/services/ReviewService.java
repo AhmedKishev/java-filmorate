@@ -27,7 +27,7 @@ public class ReviewService {
     public Review updateReview(Review review) {
         validateReview(review.getFilmId(), review.getUserId());
         Review updated = reviewStorage.updateReview(review);
-        feedService.addEvent(review.getUserId(), FeedEvent.EventType.REVIEW, FeedEvent.Operation.UPDATE, review.getReviewId());
+        feedService.addEvent(updated.getUserId(), FeedEvent.EventType.REVIEW, FeedEvent.Operation.UPDATE, updated.getReviewId());
         return updated;
     }
 
@@ -51,13 +51,17 @@ public class ReviewService {
     public void likeReview(int reviewId, int userId, boolean isPositive) {
         validateLike(reviewId, userId);
         reviewStorage.addLike(reviewId, userId, isPositive);
-        feedService.addEvent(reviewId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, userId);
+        if (!isPositive) {
+            feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.ADD, reviewId);
+        }
     }
 
     public void removeLike(int reviewId, int userId, boolean isPositive) {
         validateLike(reviewId, userId);
         reviewStorage.removeLike(reviewId, userId, isPositive);
-        feedService.addEvent(reviewId, FeedEvent.EventType.LIKE, FeedEvent.Operation.REMOVE, userId);
+        if (isPositive) {
+            feedService.addEvent(userId, FeedEvent.EventType.LIKE, FeedEvent.Operation.REMOVE, reviewId);
+        }
     }
 
     private void validateLike(int reviewId, int userId) {
