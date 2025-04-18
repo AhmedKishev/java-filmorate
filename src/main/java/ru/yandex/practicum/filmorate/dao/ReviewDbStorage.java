@@ -32,7 +32,7 @@ public class ReviewDbStorage extends BaseRepository<Review> {
         long id = review.getReviewId();
         String sql =
                 "UPDATE FILM_REVIEWS SET CONTENT = ?, IS_POSITIVE = ?" +
-                "WHERE ID = ?";
+                        "WHERE ID = ?";
         if (jdbc.update(sql,
                 review.getContent(),
                 review.isPositive(),
@@ -51,8 +51,8 @@ public class ReviewDbStorage extends BaseRepository<Review> {
         if (filmId != -1) {
             String sql =
                     "SELECT * FROM film_reviews " +
-                    "WHERE FILM_ID = ? " +
-                    "ORDER BY USEFUL DESC LIMIT ?";
+                            "WHERE FILM_ID = ? " +
+                            "ORDER BY USEFUL DESC LIMIT ?";
             return jdbc.query(sql, mapper, filmId, count);
         }
         String sql = "SELECT * FROM film_reviews ORDER BY USEFUL DESC LIMIT ?";

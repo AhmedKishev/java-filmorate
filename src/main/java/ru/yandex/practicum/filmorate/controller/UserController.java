@@ -11,16 +11,17 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.FilmService;
 import ru.yandex.practicum.filmorate.services.UserService;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
+    static final String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
     final UserService userService;
     final FilmService filmService;
-    static final String PATH_USER_ID_TO_FRIEND_ID = "/{id}/friends/{friend-id}";
 
     @Autowired
     public UserController(UserService userService, FilmService filmService) {

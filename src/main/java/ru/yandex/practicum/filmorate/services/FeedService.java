@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.dao.FeedDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFound;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
 

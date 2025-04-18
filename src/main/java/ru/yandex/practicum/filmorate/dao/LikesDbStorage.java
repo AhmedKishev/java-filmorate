@@ -6,8 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.User;
-
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -61,7 +59,7 @@ public class LikesDbStorage extends BaseRepository<Integer> {
     }
 
     public Optional<Integer> findLikeByIdToFilmId(int filmId, int userId) {
-        String LIKE_USER_FOR_FILM = "SELECT * FROM likes WHERE user_id=? AND film_id=?";
-        return jdbc.query(LIKE_USER_FOR_FILM, mapper, userId, filmId).stream().findFirst();
+        String likeUserForFilm = "SELECT * FROM likes WHERE user_id=? AND film_id=?";
+        return jdbc.query(likeUserForFilm, mapper, userId, filmId).stream().findFirst();
     }
 }
